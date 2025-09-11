@@ -1,7 +1,7 @@
 import { ref } from "@vue/reactivity"
 import * as v from "valibot"
 import { expect, test } from "vitest"
-import { useForm } from "vue-standard-schema"
+import { flatten, useForm } from "vue-standard-schema"
 
 test("without input", async () => {
   const { submit } = useForm({
@@ -33,6 +33,7 @@ test("input with schema", async () => {
     schema: v.object({
       foo: v.pipe(v.string(), v.trim(), v.minLength(1, "Please enter foo.")),
     }),
+    formatErrors: flatten,
     async submit(input, allowTest = true, error = "test not allowed.") {
       if (!allowTest && input.foo === "test") {
         errors.value = {

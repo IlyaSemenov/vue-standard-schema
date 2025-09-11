@@ -1,12 +1,12 @@
 import { reactive } from "@vue/reactivity"
 import * as v from "valibot"
 import { expect, test } from "vitest"
-import { useParse } from "vue-standard-schema"
-import { z } from "zod"
+import { flatten, useParse } from "vue-standard-schema"
+import * as z from "zod"
 
 test("parse with valibot", async () => {
   const input = reactive({
-    age: "" as number | "", // for v-input
+    age: "" as string | number,
   })
 
   const { output, errors } = useParse({
@@ -14,6 +14,7 @@ test("parse with valibot", async () => {
     schema: v.object({
       age: v.number(),
     }),
+    formatErrors: flatten,
   }, {
     flush: "sync",
   })
@@ -41,6 +42,7 @@ test("parse with zod", async () => {
     schema: z.object({
       email: z.email("Invalid email"),
     }),
+    formatErrors: flatten,
   }, {
     flush: "sync",
   })

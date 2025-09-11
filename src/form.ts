@@ -2,22 +2,9 @@ import type { StandardSchemaV1 } from "@standard-schema/spec"
 import type { MaybeRefOrGetter, Ref } from "@vue/reactivity"
 import { ref, toValue } from "@vue/reactivity"
 
-import { flattenIssues } from "./errors"
-import type { FlatErrors, GenericFlatErrors } from "./errors"
+import type { ErrorsFormatter, StandardErrors } from "./errors"
 
-// Helper function to validate using Standard Schema
-async function validateStandardSchema<TSchema extends StandardSchemaV1>(
-  schema: TSchema,
-  input: unknown,
-): Promise<{ success: true, output: StandardSchemaV1.InferOutput<TSchema> } | { success: false, issues: readonly StandardSchemaV1.Issue[] }> {
-  const result = await schema["~standard"].validate(input)
-  if ("issues" in result && result.issues) {
-    return { success: false, issues: result.issues }
-  }
-  return { success: true, output: result.value }
-}
-
-export interface UseFormReturn<TSchema extends StandardSchemaV1, TArgs extends any[], TResult> {
+export interface UseFormReturn<TArgs extends any[], TResult, TErrors> {
   /**
    * The form element ref.
    *
@@ -58,20 +45,22 @@ export interface UseFormReturn<TSchema extends StandardSchemaV1, TArgs extends a
    */
   submitted: Ref<boolean>
   /**
-   * Validation errors, compatible with Standard Schema format.
-   *
-   * Set it in the submit callback to report submit errors.
+   * Validation errors.
    */
-  errors: Ref<FlatErrors<TSchema> | undefined>
+  errors: Ref<TErrors | undefined>
 }
 
-interface BaseOptions<TSchema extends StandardSchemaV1> {
+interface BaseOptions<TErrors> {
+  /**
+   * Error formatter function that transforms raw Standard Schema issues into the desired format.
+   */
+  formatErrors?: ErrorsFormatter<TErrors>
   /**
    * Error callback.
    *
    * Called (and awaited) if the validation fails, or if `errors.value` was set by the submit handler.
    */
-  onErrors?: (errors: FlatErrors<TSchema>) => any
+  onErrors?: (errors: TErrors) => any
   /**
    * User-provided ref for `form` return value.
    */
@@ -87,7 +76,7 @@ interface BaseOptions<TSchema extends StandardSchemaV1> {
   /**
    * User-provided ref for `errors` return value.
    */
-  errors?: Ref<FlatErrors<TSchema> | undefined>
+  errors?: Ref<TErrors | undefined>
 }
 
 type SubmitCallback<Args extends any[], Result> = (
@@ -101,8 +90,8 @@ type SubmitCallback<Args extends any[], Result> = (
 /**
  * Vue3 composable for handling form submit.
  */
-export function useForm<Args extends unknown[], Result>(
-  options: BaseOptions<any> & {
+export function useForm<Args extends unknown[], Result, TErrors = StandardErrors>(
+  options: BaseOptions<TErrors> & {
     input?: never
     schema?: never
     /**
@@ -119,10 +108,10 @@ export function useForm<Args extends unknown[], Result>(
      */
     submit?: SubmitCallback<Args, Result>
   },
-): UseFormReturn<any, Args, Result>
+): UseFormReturn<Args, Result, TErrors>
 
 //
-// Input, no schema.
+// Input only (no schema).
 //
 
 /**
@@ -130,8 +119,8 @@ export function useForm<Args extends unknown[], Result>(
  *
  * Validates the input using Standard Schema.
  */
-export function useForm<TInput, TArgs extends any[], TResult>(
-  options: BaseOptions<any> & {
+export function useForm<TInput, TArgs extends any[], TResult, TErrors = StandardErrors>(
+  options: BaseOptions<TErrors> & {
     /**
      * Input value, or ref, or a getter for the submit input data.
      */
@@ -151,10 +140,10 @@ export function useForm<TInput, TArgs extends any[], TResult>(
      */
     submit?: SubmitCallback<[TInput, ...TArgs], TResult>
   },
-): UseFormReturn<any, TArgs, TResult>
+): UseFormReturn<TArgs, TResult, TErrors>
 
 //
-// Input + schema.
+// Schema.
 //
 
 /**
@@ -162,8 +151,8 @@ export function useForm<TInput, TArgs extends any[], TResult>(
  *
  * Validates the input using Standard Schema.
  */
-export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], TResult>(
-  options: BaseOptions<TSchema> & {
+export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], TResult, TErrors = StandardErrors>(
+  options: BaseOptions<TErrors> & {
     /**
      * Input data to be validated (plain value, ref or getter).
      */
@@ -187,7 +176,7 @@ export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], T
      */
     submit?: SubmitCallback<[StandardSchemaV1.InferOutput<TSchema>, ...TArgs], TResult>
   },
-): UseFormReturn<TSchema, TArgs, TResult>
+): UseFormReturn<TArgs, TResult, TErrors>
 
 //
 // No input, callback only.
@@ -210,7 +199,7 @@ export function useForm<TArgs extends any[], TResult>(
  * After successfull execution, `submitted` is true.
  */
   submit?: SubmitCallback<TArgs, TResult>,
-): UseFormReturn<any, TArgs, TResult>
+): UseFormReturn<TArgs, TResult, StandardErrors>
 
 //
 // Implementation.
@@ -218,13 +207,13 @@ export function useForm<TArgs extends any[], TResult>(
 
 export function useForm(
   optionsOrSubmit?:
-    | (BaseOptions<any> & {
+    | (BaseOptions<unknown> & {
       input?: unknown
       schema?: MaybeRefOrGetter<StandardSchemaV1>
-      submit?: SubmitCallback<any, any>
+      submit?: SubmitCallback<unknown[], unknown>
     })
-    | SubmitCallback<any, any>,
-): UseFormReturn<any, any, any> {
+    | SubmitCallback<unknown[], unknown>,
+): UseFormReturn<unknown[], unknown, unknown> {
   const options
     = (typeof optionsOrSubmit === "function" ? undefined : optionsOrSubmit) ?? {}
   const submitCallback
@@ -232,9 +221,11 @@ export function useForm(
   const hasInput = options.input !== undefined
 
   const form = options.form ?? ref<HTMLFormElement>()
-  const errors = options.errors ?? ref<GenericFlatErrors>()
+  const errors = options.errors ?? ref()
   const submitting = options.submitting ?? ref(false)
   const submitted = options.submitted ?? ref(false)
+
+  const formatErrors = options.formatErrors ?? ((issues: StandardErrors) => issues)
 
   async function submit(...args: unknown[]) {
     if (submitting.value) {
@@ -250,15 +241,15 @@ export function useForm(
     try {
       const input = toValue(options.input)
       const schema = toValue(options.schema)
-      const parseResult = schema ? await validateStandardSchema(schema, input) : undefined
-      if (parseResult && !parseResult.success) {
-        errors.value = flattenIssues(parseResult.issues)
+      const parseResult = schema ? await schema["~standard"].validate(input) : undefined
+      if (parseResult && parseResult.issues) {
+        errors.value = formatErrors(parseResult.issues)
         await options.onErrors?.(errors.value)
       } else {
         const returnValue = await Promise.resolve()
           .then(() =>
             hasInput || parseResult
-              ? submitCallback?.(parseResult ? parseResult.output : input, ...args)
+              ? submitCallback?.(parseResult ? parseResult.value : input, ...args)
               : submitCallback?.(...args),
           )
         if (errors.value) {
