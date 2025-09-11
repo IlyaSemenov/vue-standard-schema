@@ -1,7 +1,6 @@
 import { ref } from "@vue/reactivity"
-import { expectType } from "tsd"
 import * as v from "valibot"
-import { test } from "vitest"
+import { expectTypeOf, test } from "vitest"
 import { useForm } from "vue-valibot"
 
 test("plain input with schema", () => {
@@ -11,7 +10,7 @@ test("plain input with schema", () => {
       foo: v.string(),
     }),
     async submit(input) {
-      expectType<{ foo: string }>(input)
+      expectTypeOf(input).toEqualTypeOf<{ foo: string }>()
     },
   })
 })
@@ -23,7 +22,7 @@ test("ref input with schema", () => {
       foo: v.string(),
     }),
     async submit(input) {
-      expectType<{ foo: string }>(input)
+      expectTypeOf(input).toEqualTypeOf<{ foo: string }>()
     },
   })
 })
@@ -32,7 +31,7 @@ test("ref input without schema", () => {
   useForm({
     input: ref({ foo: "" as string | undefined }),
     async submit(input) {
-      expectType<{ foo: string | undefined }>(input)
+      expectTypeOf(input).toEqualTypeOf<{ foo: string | undefined }>()
     },
   })
 })
@@ -42,7 +41,7 @@ test("input with undefined schema", () => {
     input: { foo: "" as string | undefined },
     schema: undefined,
     async submit(input) {
-      expectType<{ foo: string | undefined }>(input)
+      expectTypeOf(input).toEqualTypeOf<{ foo: string | undefined }>()
     },
   })
 })
@@ -72,7 +71,7 @@ test("dynamic schema", () => {
         foo: v.string(),
       }),
     submit(input) {
-      expectType<{ foo: string }>(input)
+      expectTypeOf(input).toEqualTypeOf<{ foo: string }>()
     },
   })
 })
@@ -81,11 +80,11 @@ test("input without schema", () => {
   const { submit } = useForm({
     input: 123,
     async submit(input, commit: boolean) {
-      expectType<number>(input)
+      expectTypeOf(input).toEqualTypeOf<number>()
       return commit ? `${input}` : false
     },
   })
-  expectType<(commit: boolean) => Promise<string | false | undefined>>(submit)
+  expectTypeOf(submit).toEqualTypeOf<(commit: boolean) => Promise<string | false | undefined>>()
 })
 
 test("callback only", () => {
@@ -94,10 +93,10 @@ test("callback only", () => {
       return `${input}`
     },
   })
-  expectType<(input: number) => Promise<string | undefined>>(submit)
+  expectTypeOf(submit).toEqualTypeOf<(input: number) => Promise<string | undefined>>()
 })
 
 test("callback shortcut", () => {
   const { submit } = useForm(() => 123)
-  expectType<() => Promise<number | undefined>>(submit)
+  expectTypeOf(submit).toEqualTypeOf<() => Promise<number | undefined>>()
 })

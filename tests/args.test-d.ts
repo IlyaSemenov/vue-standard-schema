@@ -1,13 +1,12 @@
-import { expectType } from "tsd"
 import * as v from "valibot"
-import { test } from "vitest"
+import { expectTypeOf, test } from "vitest"
 import { useForm } from "vue-valibot"
 
 test("callback args", () => {
   const { submit } = useForm({
     schema: v.string(),
     async submit(input, _arg1: number, _arg2: boolean) {
-      expectType<string>(input)
+      expectTypeOf(input).toEqualTypeOf<string>()
     },
   })
   // @ts-expect-error arg1 is required
@@ -21,7 +20,7 @@ test("optional callback arg", () => {
   const { submit } = useForm({
     schema: v.string(),
     async submit(input, _arg1: number, _arg2?: boolean) {
-      expectType<string>(input)
+      expectTypeOf(input).toEqualTypeOf<string>()
     },
   })
   // @ts-expect-error arg1 is required

@@ -29,7 +29,7 @@
     "lint": "eslint --fix '**/*.{cjs,js,ts}'",
     "prepare": "husky",
     "prepublishOnly": "pnpm build",
-    "test": "vitest run && tsd"
+    "test": "vitest run --typecheck"
   },
   "peerDependencies": {
     "@vue/reactivity": "^3",
@@ -44,7 +44,6 @@
     "eslint": "^9.35.0",
     "husky": "^9.1.7",
     "tsconfig-vite-node": "^1.1.2",
-    "tsd": "^0.31.0",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5",
     "valibot": "^1.1.0",
