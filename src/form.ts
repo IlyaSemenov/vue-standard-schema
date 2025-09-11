@@ -1,11 +1,23 @@
+import type { StandardSchemaV1 } from "@standard-schema/spec"
 import type { MaybeRefOrGetter, Ref } from "@vue/reactivity"
 import { ref, toValue } from "@vue/reactivity"
-import type { FlatErrors, InferOutput } from "valibot"
-import { flatten, safeParseAsync } from "valibot"
 
-import type { GenericFlatErrors, GenericSchemaMaybeAsync } from "./types"
+import { flattenIssues } from "./errors"
+import type { FlatErrors, GenericFlatErrors } from "./errors"
 
-export interface UseFormReturn<TSchema extends GenericSchemaMaybeAsync, TArgs extends any[], TResult> {
+// Helper function to validate using Standard Schema
+async function validateStandardSchema<TSchema extends StandardSchemaV1>(
+  schema: TSchema,
+  input: unknown,
+): Promise<{ success: true, output: StandardSchemaV1.InferOutput<TSchema> } | { success: false, issues: readonly StandardSchemaV1.Issue[] }> {
+  const result = await schema["~standard"].validate(input)
+  if ("issues" in result && result.issues) {
+    return { success: false, issues: result.issues }
+  }
+  return { success: true, output: result.value }
+}
+
+export interface UseFormReturn<TSchema extends StandardSchemaV1, TArgs extends any[], TResult> {
   /**
    * The form element ref.
    *
@@ -21,7 +33,7 @@ export interface UseFormReturn<TSchema extends GenericSchemaMaybeAsync, TArgs ex
    * It will:
    *
    * - Run HTML5 validation (if the form ref is set).
-   * - Run valibot validation (if the schema is provided).
+   * - Run Standard Schema validation (if the schema is provided).
    * - Call submit callback (if provided).
    *
    * Arguments passed to this submit function will be passed to the submit callback,
@@ -46,14 +58,14 @@ export interface UseFormReturn<TSchema extends GenericSchemaMaybeAsync, TArgs ex
    */
   submitted: Ref<boolean>
   /**
-   * Validation errors, as returned by valibot.
+   * Validation errors, compatible with Standard Schema format.
    *
    * Set it in the submit callback to report submit errors.
    */
   errors: Ref<FlatErrors<TSchema> | undefined>
 }
 
-interface BaseOptions<TSchema extends GenericSchemaMaybeAsync> {
+interface BaseOptions<TSchema extends StandardSchemaV1> {
   /**
    * Error callback.
    *
@@ -116,7 +128,7 @@ export function useForm<Args extends unknown[], Result>(
 /**
  * Vue3 composable for handling form submit.
  *
- * Validates the input using valibot.
+ * Validates the input using Standard Schema.
  */
 export function useForm<TInput, TArgs extends any[], TResult>(
   options: BaseOptions<any> & {
@@ -148,16 +160,16 @@ export function useForm<TInput, TArgs extends any[], TResult>(
 /**
  * Vue3 composable for handling form submit.
  *
- * Validates the input using valibot.
+ * Validates the input using Standard Schema.
  */
-export function useForm<TSchema extends GenericSchemaMaybeAsync, TArgs extends any[], TResult>(
+export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], TResult>(
   options: BaseOptions<TSchema> & {
     /**
      * Input data to be validated (plain value, ref or getter).
      */
     input?: unknown
     /**
-     * Valibot schema (plain value, ref or getter).
+     * Standard Schema compatible schema (plain value, ref or getter).
      */
     schema: MaybeRefOrGetter<TSchema>
     /**
@@ -166,14 +178,14 @@ export function useForm<TSchema extends GenericSchemaMaybeAsync, TArgs extends a
      * Only called if:
      * - Form is not being submitted at the moment (submitting.value is falsy).
      * - HTML5 validation passes (if enabled).
-     * - Valibot validation passes.
+     * - Standard Schema validation passes.
      *
      * The first argument is the validated input, the rest arguments are the submit function arguments.
      *
      * During execution, `submitting` is true.
      * After successfull execution, `submitted` is true.
      */
-    submit?: SubmitCallback<[InferOutput<TSchema>, ...TArgs], TResult>
+    submit?: SubmitCallback<[StandardSchemaV1.InferOutput<TSchema>, ...TArgs], TResult>
   },
 ): UseFormReturn<TSchema, TArgs, TResult>
 
@@ -208,7 +220,7 @@ export function useForm(
   optionsOrSubmit?:
     | (BaseOptions<any> & {
       input?: unknown
-      schema?: MaybeRefOrGetter<GenericSchemaMaybeAsync>
+      schema?: MaybeRefOrGetter<StandardSchemaV1>
       submit?: SubmitCallback<any, any>
     })
     | SubmitCallback<any, any>,
@@ -238,9 +250,9 @@ export function useForm(
     try {
       const input = toValue(options.input)
       const schema = toValue(options.schema)
-      const parseResult = schema ? await safeParseAsync(schema, input) : undefined
+      const parseResult = schema ? await validateStandardSchema(schema, input) : undefined
       if (parseResult && !parseResult.success) {
-        errors.value = flatten(parseResult.issues)
+        errors.value = flattenIssues(parseResult.issues)
         await options.onErrors?.(errors.value)
       } else {
         const returnValue = await Promise.resolve()
@@ -249,13 +261,6 @@ export function useForm(
               ? submitCallback?.(parseResult ? parseResult.output : input, ...args)
               : submitCallback?.(...args),
           )
-          .catch((err) => {
-            if (err instanceof SubmitError) {
-              errors.value = err.errors
-              return undefined
-            }
-            throw err
-          })
         if (errors.value) {
           await options.onErrors?.(errors.value)
         } else {
@@ -269,11 +274,4 @@ export function useForm(
   }
 
   return { form, submit, submitting, submitted, errors }
-}
-
-/** @deprecated Do not use, simply set `errors` directly. */
-export class SubmitError extends Error {
-  constructor(public errors: GenericFlatErrors) {
-    super("Error submitting form.")
-  }
 }

@@ -1,9 +1,10 @@
 import { ref } from "@vue/reactivity"
 import * as v from "valibot"
 import { expectTypeOf, test } from "vitest"
-import { useForm } from "vue-valibot"
+import { useForm } from "vue-standard-schema"
+import * as z from "zod"
 
-test("plain input with schema", () => {
+test("input with valibot schema", () => {
   useForm({
     input: { foo: "" as string | undefined },
     schema: v.object({
@@ -11,6 +12,18 @@ test("plain input with schema", () => {
     }),
     async submit(input) {
       expectTypeOf(input).toEqualTypeOf<{ foo: string }>()
+    },
+  })
+})
+
+test("input with zod schema", () => {
+  useForm({
+    input: { email: "" as string | undefined },
+    schema: z.object({
+      email: z.email(),
+    }),
+    async submit(input) {
+      expectTypeOf(input).toEqualTypeOf<{ email: string }>()
     },
   })
 })
