@@ -1,5 +1,8 @@
 name: Test and Release
 
+env:
+  MAIN_REF: refs/heads/master
+
 on:
   push:
     branches: ["**"]
@@ -33,11 +36,21 @@ jobs:
       - name: Test packages
         run: pnpm run -r test
 
+      - name: Capture new release versions
+        if: ${{ github.ref == env.MAIN_REF }}
+        run: |
+          if pnpx @changesets/cli status --output=release.json; then
+            echo "RELEASE=Version $(jq -r '.releases[0].newVersion' release.json)" >> "$GITHUB_ENV"
+            rm release.json
+          fi
+
       - name: Create Release Pull Request or Publish to npm
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref == env.MAIN_REF }}
         uses: changesets/action@v1
         with:
           publish: pnpm changeset publish
+          title: ${{ env.RELEASE }}
+          commit: ${{ env.RELEASE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
