@@ -44,7 +44,7 @@
     "eslint": "^9.35.0",
     "husky": "^9.1.7",
     "tsconfig-vite-node": "^1.2.0",
-    "tsup": "^8.0.2",
+    "tsup": "^8.5.0",
     "typescript": "^5.4.5",
     "valibot": "^1.1.0",
     "vite-tsconfig-paths": "^5.1.4",
