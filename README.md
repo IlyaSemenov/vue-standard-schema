@@ -35,11 +35,7 @@ const { form, submit, submitting, errors } = useForm({
   }),
   async submit(input) {
     // Input is validated against the schema and typed accordingly.
-    const res = await api.post(input)
-    if (!res) {
-      // errors is the ref of flattened errors typed with schema fields.
-      errors.value = { root: ["Failed to submit."] }
-    }
+    await api.post(input)
   },
 })
 </script>
@@ -49,13 +45,10 @@ const { form, submit, submitting, errors } = useForm({
     <!-- No fancy syntax for input fields, just use what you prefer. -->
     Name: <input v-model="fields.name" />
 
-    <!-- Field errors. -->
-    <div v-for="error in errors?.nested?.name">{{ error }}</div>
-
     <button type="submit" :disabled="submitting">Submit</button>
 
-    <!-- Form errors. -->
-    <div v-for="error in errors?.root">{{ error }}</div>
+    <!-- Raw validation errors. See below how to flatten or treeify them. -->
+    <div v-for="error in errors">{{ error }}</div>
   </form>
 </template>
 ```
@@ -108,6 +101,12 @@ If `input` and/or `schema` were provided, the first argument passed to the submi
 
 During execution, `submitting` is true.
 After successfull execution, `submitted` is true.
+
+### `formatErrors`
+
+(Optional) Error formatter function that transforms raw Standard Schema issues into the desired format.
+
+See _"Formatting errors"_ below.
 
 ### `onErrors`
 
@@ -195,9 +194,47 @@ Type: `Ref<boolean>`.
 
 Validation errors, either coming from schema validation, or set manually in the submit callback.
 
-Type: `Ref<FlatErrors?>`.
+## Formatting errors
 
-The `FlatErrors` type resembles the one returned by Valibot's [flatten](https://valibot.dev/api/flatten/).
+By default, the errors are returned as raw Standard Schema issues.
+
+Use `formatError` option to format or structure them differently. For example, use the built-in `flatten` to convert them to `FlatErrors` (compatible with Valibot's `flatten()`):
+
+```vue
+<script setup lang="ts">
+import * as v from "valibot"
+import { flatten, useForm } from "vue-standard-schema"
+
+const fields = reactive({
+  name: "",
+})
+
+const { form, submit, submitting, errors } = useForm({
+  input: fields,
+  schema: v.object({
+    name: v.pipe(v.string(), v.trim(), v.minLength(1, "Please enter your name.")),
+  }),
+  formatErrors: flatten, // <--- Custom errors formatter.
+  async submit(input) {
+    await api.post(input)
+  },
+})
+</script>
+
+<template>
+  <form ref="form" @submit.prevent="submit">
+    Name: <input v-model="fields.name" />
+
+    <!-- Field errors. -->
+    <div v-for="error in errors?.nested?.name">{{ error }}</div>
+
+    <button type="submit" :disabled="submitting">Submit</button>
+
+    <!-- Form errors. -->
+    <div v-for="error in errors?.root">{{ error }}</div>
+  </form>
+</template>
+```
 
 ## Submit with arguments
 
@@ -252,12 +289,11 @@ const { submit, errors } = useForm({
   schema,
   submit(input) {
     if (!validateInput(input)) {
-      errors.value = { root: ["Input is invalid."] }
+      errors.value = [{ message: "Input is invalid." }]
     }
   },
   onErrors(errors) {
-    // errors is FlatErrors (coming either from validation or from submit handler)
-    // TODO: show some alert box.
+    // errors here come either from schema validation, or from the submit handler.
     console.error(errors)
   },
 })
@@ -274,17 +310,27 @@ Example usage with Valibot:
 ```vue
 <script setup lang="ts">
 import * as v from "valibot"
-import { useParse } from "vue-standard-schema"
+import { flatten, useParse } from "vue-standard-schema"
 
 const input = reactive({
-  age: "" as number | string,
+  age: "" as string | number,
 })
 
+// By default returns raw Standard Schema issues
 const { errors: presubmitErrors } = useParse({
   input,
   schema: v.object({
     age: v.number(),
   })
+})
+
+// Or use flatten for Valibot-style errors
+const { errors: presubmitErrors } = useParse({
+  input,
+  schema: v.object({
+    age: v.number(),
+  }),
+  formatErrors: flatten
 })
 </script>
 

@@ -26,7 +26,7 @@
   ],
   "scripts": {
     "build": "tsup",
-    "lint": "eslint --fix '**/*.{cjs,js,ts}'",
+    "lint": "eslint --fix .",
     "prepare": "husky",
     "prepublishOnly": "pnpm build",
     "test": "vitest run --typecheck"
@@ -36,7 +36,8 @@
     "@vue/runtime-core": "^3"
   },
   "dependencies": {
-    "@standard-schema/spec": "^1.0.0"
+    "@standard-schema/spec": "^1.0.0",
+    "@standard-schema/utils": "^0.3.0"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
