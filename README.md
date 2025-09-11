@@ -197,6 +197,8 @@ Validation errors, either coming from schema validation, or set manually in the 
 
 Type: `Ref<FlatErrors?>`.
 
+The `FlatErrors` type resembles the one returned by Valibot's [flatten](https://valibot.dev/api/flatten/).
+
 ## Submit with arguments
 
 Additional arguments passed to `submit` composable will be passed to the submit callback after `input`:
