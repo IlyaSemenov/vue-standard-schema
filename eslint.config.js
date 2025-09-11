@@ -1,3 +1,10 @@
-import { defineEslintConfig } from "@ilyasemenov/lint-config"
+// @ts-check
 
-export default defineEslintConfig()
+import { defineConfig } from "@ilyasemenov/eslint-config"
+
+export default defineConfig().append({
+  files: ["**/*.md/*.{js,ts}"],
+  rules: {
+    "no-console": "off",
+  },
+})
