@@ -42,7 +42,7 @@
     "@vue/reactivity": "^3.4.29",
     "@vue/runtime-core": "^3.4.29",
     "eslint": "^9.35.0",
-    "husky": "^9.0.11",
+    "husky": "^9.1.7",
     "tsconfig-vite-node": "^1.1.2",
     "tsd": "^0.31.0",
     "tsup": "^8.0.2",
