@@ -43,7 +43,7 @@
     "@vue/runtime-core": "^3.4.29",
     "eslint": "^9.35.0",
     "husky": "^9.1.7",
-    "tsconfig-vite-node": "^1.1.2",
+    "tsconfig-vite-node": "^1.2.0",
     "tsup": "^8.0.2",
     "typescript": "^5.4.5",
     "valibot": "^1.1.0",

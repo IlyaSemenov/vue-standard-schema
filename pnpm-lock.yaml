@@ -27,8 +27,8 @@ importers:
         specifier: ^9.1.7
         version: 9.1.7
       tsconfig-vite-node:
-        specifier: ^1.1.2
-        version: 1.1.2
+        specifier: ^1.2.0
+        version: 1.2.0
       tsup:
         specifier: ^8.0.2
         version: 8.0.2(postcss@8.5.6)(typescript@5.4.5)
@@ -2710,8 +2710,8 @@ packages:
       typescript:
         optional: true
 
-  tsconfig-vite-node@1.1.2:
-    resolution: {integrity: sha512-7QOQ0Rq6NrRjQVPVETQlGsEf6CkHjD+Xxio5EnPe/+IZabhdmaTZ3iRxaHBuEfWKyA8CnjmjLxat263+Pd1Iyw==}
+  tsconfig-vite-node@1.2.0:
+    resolution: {integrity: sha512-NP9uU74IiNTKs/yIY0nXo9LcKCJ79lriPuLQFxefk1pYDNWZI4NcqSaKok7VjeigOTWWNAxVErc8J5tXpbUz1Q==}
 
   tslib@1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
@@ -5988,7 +5988,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.4.5
 
-  tsconfig-vite-node@1.1.2: {}
+  tsconfig-vite-node@1.2.0: {}
 
   tslib@1.14.1: {}
 
