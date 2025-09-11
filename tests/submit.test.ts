@@ -1,8 +1,8 @@
 import { reactive, ref } from "@vue/reactivity"
 import * as v from "valibot"
 import { describe, expect, test } from "vitest"
-import type { GenericFlatErrors } from "vue-valibot"
-import { SubmitError, useForm } from "vue-valibot"
+import type { GenericFlatErrors } from "vue-standard-schema"
+import { useForm } from "vue-standard-schema"
 
 describe("input", () => {
   test("plain", async () => {
@@ -254,25 +254,6 @@ describe("onErrors", () => {
     })
     await expect(submit()).rejects.toThrow("Fail")
     expect(callbackErrors.value).toBeUndefined()
-  })
-
-  test("catch SubmitError", async () => {
-    const input = ref("")
-    const callbackErrors = ref<GenericFlatErrors>()
-    const { submit } = useForm({
-      input,
-      schema: v.string(),
-      submit(input) {
-        if (!input) {
-          throw new SubmitError({ root: ["Input required."] })
-        }
-      },
-      onErrors(errors) {
-        callbackErrors.value = errors
-      },
-    })
-    expect(await submit()).toBeUndefined()
-    expect(callbackErrors.value).toMatchObject({ root: ["Input required."] })
   })
 })
 

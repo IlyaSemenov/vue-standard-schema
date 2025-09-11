@@ -1,6 +1,8 @@
-# vue-valibot
+# vue-standard-schema
 
-A set of simple Vue3 composables for handling form submit, with optional [valibot](https://valibot.dev/) integration.
+A set of simple Vue3 composables for handling form submit.
+
+Supports optional optional validation with any [Standard Schema](https://standardschema.dev/) compatible validation library, such as [Zod](https://zod.dev), [Valibot](https://valibot.dev/), [ArkType](https://arktype.io/), and others.
 
 Unlike FormKit, VeeValidate and others, keeps things simple and doesn't interfere with neither data storage nor the UI workflow.
 
@@ -9,7 +11,7 @@ Full Typescript support with type inference.
 ## Install
 
 ```sh
-npm install vue-valibot
+npm install vue-standard-schema
 ```
 
 ## Use
@@ -17,7 +19,7 @@ npm install vue-valibot
 ```vue
 <script setup lang="ts">
 import * as v from "valibot"
-import { useForm } from "vue-valibot"
+import { useForm } from "vue-standard-schema"
 
 // Store input data as you prefer, such as with Vue reactive or ref.
 const fields = reactive({
@@ -27,6 +29,7 @@ const fields = reactive({
 const { form, submit, submitting, errors } = useForm({
   input: fields,
   // Schema is optional, but usually recommended.
+  // Use any Standard Schema compatible library (valibot in this example).
   schema: v.object({
     name: v.pipe(v.string(), v.trim(), v.minLength(1, "Please enter your name.")),
   }),
@@ -34,7 +37,7 @@ const { form, submit, submitting, errors } = useForm({
     // Input is validated against the schema and typed accordingly.
     const res = await api.post(input)
     if (!res) {
-      // errors is valibot.FlatErrors ref typed with schema fields.
+      // errors is the ref of flattened errors typed with schema fields.
       errors.value = { root: ["Failed to submit."] }
     }
   },
@@ -89,7 +92,7 @@ const {
 
 ### `schema`
 
-(Optional) Valibot schema (or a function that returns a schema, such as when the schema depends on the context).
+(Optional) Standard Schema compatible schema (or a function that returns a schema, such as when the schema depends on the context). Works with Zod, Valibot, ArkType, and other Standard Schema compatible libraries.
 
 ### `submit`
 
@@ -99,7 +102,7 @@ Only called if:
 
 - Form is not being submitted at the moment (`submitting.value` is falsy).
 - HTML5 validation passes (if enabled).
-- Valibot validation passes (if used).
+- Schema validation passes (if used).
 
 If `input` and/or `schema` were provided, the first argument passed to the submit callback is the (possibly validated) form input. The rest of the arguments are the submit function arguments.
 
@@ -163,7 +166,7 @@ The actual form submit function that you should call with something like:
 It will:
 
 - Run HTML5 validation (if the form ref is set).
-- Run valibot validation (if the schema is provided).
+- Validate against the schema (if provided).
 - Call submit callback (if provided).
 
 Arguments passed to this submit function are passed to the submit callback, possibly prepended with form input (if `input` and/or `schema` were provided).
@@ -251,7 +254,7 @@ const { submit, errors } = useForm({
     }
   },
   onErrors(errors) {
-    // errors is valibot.FlatErrors (coming either from validation or from submit handler)
+    // errors is FlatErrors (coming either from validation or from submit handler)
     // TODO: show some alert box.
     console.error(errors)
   },
@@ -260,14 +263,19 @@ const { submit, errors } = useForm({
 
 ## useParse
 
-`useParse` reactively runs Valibot validation on every input change.
+`useParse` reactively runs Standard Schema validation on every input change.
 
 It could be used together with `useForm` or independently.
 
+Example usage with Valibot:
+
 ```vue
 <script setup lang="ts">
+import * as v from "valibot"
+import { useParse } from "vue-standard-schema"
+
 const input = reactive({
-  age: "" as number | "", // for v-input
+  age: "" as number | string,
 })
 
 const { errors: presubmitErrors } = useParse({
