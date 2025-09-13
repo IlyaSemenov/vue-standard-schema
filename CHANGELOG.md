@@ -1,4 +1,4 @@
-# vue-valibot
+# vue-standard-schema
 
 ## 4.0.0
 
