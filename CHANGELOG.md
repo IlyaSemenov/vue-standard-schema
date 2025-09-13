@@ -1,5 +1,12 @@
 # vue-valibot
 
+## 4.0.0
+
+### Major Changes
+
+- 37f8838: Return Standard Schema errors by default. Add `formatErrors` option, and provide backwards-compatible `flatten` formatter.
+- 7850861: Use `standard-schema` instead of `valibot`. Rename package to `vue-standard-schema`.
+
 ## 3.1.2
 
 ### Patch Changes
