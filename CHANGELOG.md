@@ -1,5 +1,11 @@
 # vue-standard-schema
 
+## 4.0.1
+
+### Patch Changes
+
+- c6113b1: Fix type of `useParse()` output value.
+
 ## 4.0.0
 
 ### Major Changes
