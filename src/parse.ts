@@ -7,7 +7,7 @@ import type { ErrorsFormatter, StandardErrors } from "./errors"
 
 export type UseParseReturn<TSchema extends StandardSchemaV1, TErrors = StandardErrors> = {
   result: Ref<StandardSchemaV1.Result<StandardSchemaV1.InferOutput<TSchema>>>
-  output: Ref<StandardSchemaV1.InferOutput<TSchema>>
+  output: Ref<StandardSchemaV1.InferOutput<TSchema> | undefined>
   errors: Ref<TErrors | undefined>
 }
 

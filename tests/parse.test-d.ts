@@ -3,12 +3,13 @@ import { expectTypeOf, test } from "vitest"
 import type { FlatErrors, StandardErrors } from "vue-standard-schema"
 import { flatten, useParse } from "vue-standard-schema"
 
-test("raw errors", () => {
-  const { errors } = useParse({
+test("basic", () => {
+  const { errors, output } = useParse({
     schema: v.object({
       age: v.number(),
     }),
   })
+  expectTypeOf(output.value).toEqualTypeOf<{ age: number } | undefined>()
   expectTypeOf(errors.value).toEqualTypeOf<StandardErrors | undefined>()
 })
 
