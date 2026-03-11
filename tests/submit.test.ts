@@ -268,6 +268,50 @@ describe("onErrors", () => {
   })
 })
 
+describe("submitting guard", () => {
+  test("concurrent submit is ignored", async () => {
+    let callCount = 0
+    let resolve!: () => void
+    const blocker = new Promise<void>((r) => {
+      resolve = r
+    })
+    const { submit, submitting } = useForm(async () => {
+      callCount++
+      await blocker
+    })
+
+    const first = submit()
+    // submitting is set synchronously before any await
+    expect(submitting.value).toBe(true)
+
+    // Second call while first is in progress — should be a no-op.
+    const second = submit()
+    expect(await second).toBeUndefined()
+
+    resolve()
+    await first
+    expect(callCount).toBe(1)
+    expect(submitting.value).toBe(false)
+  })
+
+  test("submitting is true during execution", async () => {
+    let resolve!: () => void
+    const blocker = new Promise<void>((r) => {
+      resolve = r
+    })
+    const { submit, submitting } = useForm(() => blocker)
+
+    expect(submitting.value).toBe(false)
+    const done = submit()
+    // submitting is set synchronously before any await
+    expect(submitting.value).toBe(true)
+
+    resolve()
+    await done
+    expect(submitting.value).toBe(false)
+  })
+})
+
 test("user-provided refs", async () => {
   const form = ref()
   const submitting = ref(false)
