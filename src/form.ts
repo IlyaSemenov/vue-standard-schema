@@ -12,7 +12,7 @@ export interface UseFormReturn<TArgs extends any[], TResult, TErrors> {
    */
   form: Ref<HTMLFormElement | undefined>
   /**
-   * The actual form submit function that you should call with something like:
+   * The form submit function. Use it like:
    *
    * - `<form @submit.prevent="submit">`
    * - `<button @click="submit">`
@@ -21,21 +21,21 @@ export interface UseFormReturn<TArgs extends any[], TResult, TErrors> {
    *
    * - Run HTML5 validation (if the form ref is set).
    * - Run Standard Schema validation (if the schema is provided).
-   * - Call submit callback (if provided).
+   * - Call the submit callback (if provided).
    *
-   * Arguments passed to this submit function will be passed to the submit callback,
-   * prepended with (possibly validated) form input (unless using the shortcut variant of useForm).
+   * Arguments passed to this function are forwarded to the submit callback,
+   * prepended with the (possibly validated) form input (unless using the shortcut variant of useForm).
    *
    * During execution, `submitting` is true.
-   * After successfull execution, `submitted` is true.
+   * After successful execution, `submitted` is true.
    */
   submit: (...args: TArgs) => Promise<TResult | undefined>
   /**
-   * Is the form submit callback executing at the moment?
+   * Whether the form submit callback is currently executing.
    *
-   * Use this to disable submit button.
+   * Use this to disable the submit button.
    *
-   * Also, `useForm` will not perform submit if it sees this is `true`.
+   * `useForm` will also skip submission if this is already `true`.
    */
   submitting: Ref<boolean>
   /**
@@ -58,23 +58,23 @@ interface BaseOptions<TErrors> {
   /**
    * Error callback.
    *
-   * Called (and awaited) if the validation fails, or if `errors.value` was set by the submit handler.
+   * Called (and awaited) when validation fails or when `errors.value` is set by the submit handler.
    */
   onErrors?: (errors: TErrors) => any
   /**
-   * User-provided ref for `form` return value.
+   * User-provided ref for the `form` return value.
    */
   form?: Ref<HTMLFormElement | undefined>
   /**
-   * User-provided ref for `submitting` return value.
+   * User-provided ref for the `submitting` return value.
    */
   submitting?: Ref<boolean>
   /**
-   * User-provided ref for `submitted` return value.
+   * User-provided ref for the `submitted` return value.
    */
   submitted?: Ref<boolean>
   /**
-   * User-provided ref for `errors` return value.
+   * User-provided ref for the `errors` return value.
    */
   errors?: Ref<TErrors | undefined>
 }
@@ -88,7 +88,7 @@ type SubmitCallback<Args extends any[], Result> = (
 //
 
 /**
- * Vue3 composable for handling form submit.
+ * Vue 3 composable for handling form submission.
  */
 export function useForm<Args extends unknown[], Result, TErrors = StandardErrors>(
   options: BaseOptions<TErrors> & {
@@ -98,13 +98,13 @@ export function useForm<Args extends unknown[], Result, TErrors = StandardErrors
      * Form submit callback.
      *
      * Only called if:
-     * - Form is not being submitted at the moment (submitting.value is falsy).
+     * - The form is not already being submitted (`submitting.value` is falsy).
      * - HTML5 validation passes (if enabled).
      *
-     * The arguments are the submit function arguments.
+     * Arguments are passed through from the submit function.
      *
      * During execution, `submitting` is true.
-     * After successfull execution, `submitted` is true.
+     * After successful execution, `submitted` is true.
      */
     submit?: SubmitCallback<Args, Result>
   },
@@ -115,14 +115,14 @@ export function useForm<Args extends unknown[], Result, TErrors = StandardErrors
 //
 
 /**
- * Vue3 composable for handling form submit.
+ * Vue 3 composable for handling form submission.
  *
  * Validates the input using Standard Schema.
  */
 export function useForm<TInput, TArgs extends any[], TResult, TErrors = StandardErrors>(
   options: BaseOptions<TErrors> & {
     /**
-     * Input value, or ref, or a getter for the submit input data.
+     * The input data: a plain value, ref, or getter.
      */
     input: MaybeRefOrGetter<TInput>
     schema?: never
@@ -130,13 +130,13 @@ export function useForm<TInput, TArgs extends any[], TResult, TErrors = Standard
      * Form submit callback.
      *
      * Only called if:
-     * - Form is not being submitted at the moment (submitting.value is falsy).
+     * - The form is not already being submitted (`submitting.value` is falsy).
      * - HTML5 validation passes (if enabled).
      *
-     * The first argument is the form input, the rest arguments are the submit function arguments.
+     * The first argument is the form input; the remaining arguments are passed through from the submit function.
      *
      * During execution, `submitting` is true.
-     * After successfull execution, `submitted` is true.
+     * After successful execution, `submitted` is true.
      */
     submit?: SubmitCallback<[TInput, ...TArgs], TResult>
   },
@@ -147,32 +147,32 @@ export function useForm<TInput, TArgs extends any[], TResult, TErrors = Standard
 //
 
 /**
- * Vue3 composable for handling form submit.
+ * Vue 3 composable for handling form submission.
  *
  * Validates the input using Standard Schema.
  */
 export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], TResult, TErrors = StandardErrors>(
   options: BaseOptions<TErrors> & {
     /**
-     * Input data to be validated (plain value, ref or getter).
+     * The input data to validate (plain value, ref, or getter).
      */
     input?: unknown
     /**
-     * Standard Schema compatible schema (plain value, ref or getter).
+     * A Standard Schema compatible schema (plain value, ref, or getter).
      */
     schema: MaybeRefOrGetter<TSchema>
     /**
      * Form submit callback.
      *
      * Only called if:
-     * - Form is not being submitted at the moment (submitting.value is falsy).
+     * - The form is not already being submitted (`submitting.value` is falsy).
      * - HTML5 validation passes (if enabled).
      * - Standard Schema validation passes.
      *
-     * The first argument is the validated input, the rest arguments are the submit function arguments.
+     * The first argument is the validated input; the remaining arguments are passed through from the submit function.
      *
      * During execution, `submitting` is true.
-     * After successfull execution, `submitted` is true.
+     * After successful execution, `submitted` is true.
      */
     submit?: SubmitCallback<[StandardSchemaV1.InferOutput<TSchema>, ...TArgs], TResult>
   },
@@ -183,20 +183,20 @@ export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], T
 //
 
 /**
- * Vue3 composable for handling form submit.
+ * Vue 3 composable for handling form submission.
  */
 export function useForm<TArgs extends any[], TResult>(
 /**
  * Form submit callback.
  *
  * Only called if:
- * - Form is not being submitted at the moment (submitting.value is falsy).
+ * - The form is not already being submitted (`submitting.value` is falsy).
  * - HTML5 validation passes (if enabled).
  *
- * The arguments are the submit function arguments.
+ * Arguments are passed through from the submit function.
  *
  * During execution, `submitting` is true.
- * After successfull execution, `submitted` is true.
+ * After successful execution, `submitted` is true.
  */
   submit?: SubmitCallback<TArgs, TResult>,
 ): UseFormReturn<TArgs, TResult, StandardErrors>

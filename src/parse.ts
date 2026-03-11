@@ -14,11 +14,11 @@ export type UseParseReturn<TSchema extends StandardSchemaV1, TErrors = StandardE
 export function useParse<TSchema extends StandardSchemaV1, TErrors = StandardErrors>(
   options: {
     /**
-     * Input data to be validated (plain value, ref or getter).
+     * The input data to validate (plain value, ref, or getter).
      */
     input?: unknown
     /**
-     * Standard Schema compatible schema (plain value, ref or getter).
+     * A Standard Schema compatible schema (plain value, ref, or getter).
      */
     schema: MaybeRefOrGetter<TSchema>
     /**

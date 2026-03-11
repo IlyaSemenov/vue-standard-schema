@@ -9,18 +9,16 @@ import type { StandardErrors } from "./base"
  */
 export interface FlatErrors {
   /**
-   * The root errors.
+   * Root-level errors.
    *
-   * Hint: The error messages of issues without a path that belong to the root
-   * of the schema are added to this key.
+   * Contains error messages from issues without a path (belonging to the root of the schema).
    */
   root?: string[]
   /**
-   * The nested errors.
+   * Nested field errors.
    *
-   * Hint: The error messages of issues with a path that belong to the nested
-   * parts of the schema and can be converted to a dot path are added to this
-   * key.
+   * Contains error messages from issues with a path (belonging to nested parts
+   * of the schema), keyed by their dot-notation path.
    */
   nested?: Partial<{
     [key: string]: string[]

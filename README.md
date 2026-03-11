@@ -1,12 +1,12 @@
 # vue-standard-schema
 
-A set of simple Vue3 composables for handling form submit.
+Simple Vue 3 composables for handling form submission.
 
-Supports optional optional validation with any [Standard Schema](https://standardschema.dev/) compatible validation library, such as [Zod](https://zod.dev), [Valibot](https://valibot.dev/), [ArkType](https://arktype.io/), and others.
+Supports optional validation with any [Standard Schema](https://standardschema.dev/) compatible validation library, such as [Zod](https://zod.dev), [Valibot](https://valibot.dev/), [ArkType](https://arktype.io/), and others.
 
-Unlike FormKit, VeeValidate and others, keeps things simple and doesn't interfere with neither data storage nor the UI workflow.
+Unlike FormKit, VeeValidate, and similar libraries, this keeps things simple and doesn't interfere with either data storage or the UI workflow.
 
-Full Typescript support with type inference.
+Full TypeScript support with type inference.
 
 ## Install
 
@@ -21,15 +21,15 @@ npm install vue-standard-schema
 import * as v from "valibot"
 import { useForm } from "vue-standard-schema"
 
-// Store input data as you prefer, such as with Vue reactive or ref.
+// Store input data however you prefer, e.g. with Vue reactive or ref.
 const fields = reactive({
   name: "",
 })
 
 const { form, submit, submitting, errors } = useForm({
   input: fields,
-  // Schema is optional, but usually recommended.
-  // Use any Standard Schema compatible library (valibot in this example).
+  // Schema is optional but usually recommended.
+  // Use any Standard Schema compatible library (Valibot in this example).
   schema: v.object({
     name: v.pipe(v.string(), v.trim(), v.minLength(1, "Please enter your name.")),
   }),
@@ -42,12 +42,12 @@ const { form, submit, submitting, errors } = useForm({
 
 <template>
   <form ref="form" @submit.prevent="submit">
-    <!-- No fancy syntax for input fields, just use what you prefer. -->
+    <!-- No special syntax for input fields — just use what you prefer. -->
     Name: <input v-model="fields.name" />
 
     <button type="submit" :disabled="submitting">Submit</button>
 
-    <!-- Raw validation errors. See below how to flatten or treeify them. -->
+    <!-- Raw validation errors. See below for how to flatten or structure them. -->
     <div v-for="error in errors">{{ error }}</div>
   </form>
 </template>
@@ -64,12 +64,12 @@ const {
   submitted,
   errors,
 } = useForm({
-  // All options are optional to provide.
+  // All options are optional.
   input,
   schema,
   submit,
   onErrors,
-  // Optional defaults for the return values.
+  // Optional overrides for the return value refs.
   form,
   submitting,
   submitted,
@@ -81,11 +81,11 @@ const {
 
 ### `input`
 
-(Optional) Input value, or ref, or a getter, of the data to be validated and/or passed to `submit`.
+(Optional) The data to be validated and/or passed to `submit`. Can be a plain value, a ref, or a getter.
 
 ### `schema`
 
-(Optional) Standard Schema compatible schema (or a function that returns a schema, such as when the schema depends on the context). Works with Zod, Valibot, ArkType, and other Standard Schema compatible libraries.
+(Optional) A Standard Schema compatible schema (or a function returning a schema, useful when the schema depends on context). Works with Zod, Valibot, ArkType, and other Standard Schema compatible libraries.
 
 ### `submit`
 
@@ -93,14 +93,14 @@ const {
 
 Only called if:
 
-- Form is not being submitted at the moment (`submitting.value` is falsy).
+- The form is not already being submitted (`submitting.value` is falsy).
 - HTML5 validation passes (if enabled).
 - Schema validation passes (if used).
 
-If `input` and/or `schema` were provided, the first argument passed to the submit callback is the (possibly validated) form input. The rest of the arguments are the submit function arguments.
+If `input` and/or `schema` are provided, the first argument passed to the submit callback is the (possibly validated) form input. Any remaining arguments are the submit function arguments.
 
 During execution, `submitting` is true.
-After successfull execution, `submitted` is true.
+After successful execution, `submitted` is true.
 
 ### `formatErrors`
 
@@ -112,13 +112,13 @@ See _"Formatting errors"_ below.
 
 (Optional) Error callback.
 
-Called (and awaited) if the validation fails, or if `errors.value` was set by the submit handler.
+Called (and awaited) when validation fails or when `errors.value` is set by the submit handler.
 
 ### `form`, `submitting`, `submitted`, `errors`
 
-Normally, `useForm` will create and return these refs (see below), but you may optionally provide your own.
+Normally, `useForm` creates and returns these refs (see below), but you can optionally provide your own.
 
-For example, this could be used to share the single `submitting` flag between multiple forms:
+For example, you can share a single `submitting` flag between multiple forms:
 
 ```ts
 const submitting = ref(false)
@@ -133,12 +133,12 @@ const { submit: submit2 } = useForm({
   async submit() { /* ... */ }
 })
 
-// `submitting` will be true during submit of either form.
+// `submitting` will be true during submission of either form.
 ```
 
 ## useForm shortcut
 
-All the composable options are optional. If the only option you need is `submit`, there is a shortcut variant:
+All composable options are optional. If the only option you need is `submit`, there is a shortcut variant:
 
 ```ts
 const { submit, submitting } = useForm(async () => {
@@ -153,11 +153,11 @@ const { submit, submitting } = useForm(async () => {
 
 The form element ref.
 
-Using it with `<form ref="form">` will enable HTML5 validation on submit.
+Binding it with `<form ref="form">` enables HTML5 validation on submit.
 
 ### `submit`
 
-The actual form submit function that you should call with something like:
+The form submit function. Use it like:
 
 - `<form @submit.prevent="submit">`
 - `<button @click="submit">`
@@ -166,39 +166,39 @@ It will:
 
 - Run HTML5 validation (if the form ref is set).
 - Validate against the schema (if provided).
-- Call submit callback (if provided).
+- Call the submit callback (if provided).
 
-Arguments passed to this submit function are passed to the submit callback, possibly prepended with form input (if `input` and/or `schema` were provided).
+Arguments passed to this function are forwarded to the submit callback, prepended with the form input (if `input` and/or `schema` are provided).
 
-During execution, `submitting` is true. After successfull execution, `submitted` is true.
+During execution, `submitting` is true. After successful execution, `submitted` is true.
 
 ### `submitting`
 
-Is the form submit callback executing at the moment?
+Whether the form submit callback is currently executing.
 
-Use this to disable submit button.
+Use this to disable the submit button.
 
-Also, `useForm` will not perform submit if it sees this is `true`.
+`useForm` will also skip submission if this is already `true`.
 
 Type: `Ref<boolean>`.
 
 ### `submitted`
 
-Has the form been successfully submitted?
+Whether the form has been successfully submitted.
 
-Feel free to reset. `useForm` doesn't depend on this value.
+Feel free to reset this manually. `useForm` doesn't depend on this value.
 
 Type: `Ref<boolean>`.
 
 ### `errors`
 
-Validation errors, either coming from schema validation, or set manually in the submit callback.
+Validation errors, either from schema validation or set manually in the submit callback.
 
 ## Formatting errors
 
-By default, the errors are returned as raw Standard Schema issues.
+By default, errors are returned as raw Standard Schema issues.
 
-Use `formatError` option to format or structure them differently. For example, use the built-in `flatten` to convert them to `FlatErrors` (compatible with Valibot's `flatten()`):
+Use the `formatErrors` option to format or structure them differently. For example, use the built-in `flatten` to convert them to `FlatErrors` (compatible with Valibot's `flatten()`):
 
 ```vue
 <script setup lang="ts">
@@ -214,7 +214,7 @@ const { form, submit, submitting, errors } = useForm({
   schema: v.object({
     name: v.pipe(v.string(), v.trim(), v.minLength(1, "Please enter your name.")),
   }),
-  formatErrors: flatten, // <--- Custom errors formatter.
+  formatErrors: flatten, // <--- Custom error formatter.
   async submit(input) {
     await api.post(input)
   },
@@ -230,7 +230,7 @@ const { form, submit, submitting, errors } = useForm({
 
     <button type="submit" :disabled="submitting">Submit</button>
 
-    <!-- Form errors. -->
+    <!-- Form-level errors. -->
     <div v-for="error in errors?.root">{{ error }}</div>
   </form>
 </template>
@@ -238,7 +238,7 @@ const { form, submit, submitting, errors } = useForm({
 
 ## Submit with arguments
 
-Additional arguments passed to `submit` composable will be passed to the submit callback after `input`:
+Additional arguments passed to `submit` are forwarded to the submit callback after `input`:
 
 ```ts
 const { submit } = useForm({
@@ -250,7 +250,7 @@ const { submit } = useForm({
 })
 ```
 
-and then:
+Then in the template:
 
 ```html
 <form ref="form" @submit.prevent="submit">
@@ -262,7 +262,7 @@ and then:
 </form>
 ```
 
-If there was no `input` composable option, all arguments are passed as is:
+If no `input` option was provided, all arguments are passed through directly:
 
 ```ts
 const { submit, submitting } = useForm(
@@ -272,16 +272,16 @@ const { submit, submitting } = useForm(
   },
 )
 
-// Arguments are type checked:
+// Arguments are type-checked:
 submit(10, "foo")
 submit(20, "bar", true)
 ```
 
 ## Custom submit errors
 
-You can set `errors` inside the submit handler. This will be treated the same way as if errors were produced by the schema.
+You can set `errors` inside the submit handler. These are treated the same way as schema validation errors.
 
-In particular, this could be used together with `onError`:
+This is particularly useful together with `onErrors`:
 
 ```ts
 const { submit, errors } = useForm({
@@ -293,7 +293,7 @@ const { submit, errors } = useForm({
     }
   },
   onErrors(errors) {
-    // errors here come either from schema validation, or from the submit handler.
+    // Errors here come from either schema validation or the submit handler.
     console.error(errors)
   },
 })
@@ -303,9 +303,9 @@ const { submit, errors } = useForm({
 
 `useParse` reactively runs Standard Schema validation on every input change.
 
-It could be used together with `useForm` or independently.
+It can be used together with `useForm` or independently.
 
-Example usage with Valibot:
+Example with Valibot:
 
 ```vue
 <script setup lang="ts">
@@ -316,7 +316,7 @@ const input = reactive({
   age: "" as string | number,
 })
 
-// By default returns raw Standard Schema issues
+// By default, returns raw Standard Schema issues.
 const { errors: presubmitErrors } = useParse({
   input,
   schema: v.object({
@@ -324,7 +324,7 @@ const { errors: presubmitErrors } = useParse({
   })
 })
 
-// Or use flatten for Valibot-style errors
+// Or use flatten for Valibot-style errors.
 const { errors: presubmitErrors } = useParse({
   input,
   schema: v.object({
