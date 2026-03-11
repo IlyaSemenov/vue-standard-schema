@@ -1,5 +1,6 @@
+import type { StandardSchemaV1 } from "@standard-schema/spec"
 import { reactive, ref } from "@vue/reactivity"
-import { expect, mock, test } from "bun:test"
+import { expect, test } from "bun:test"
 import * as v from "valibot"
 import { flatten, useParse } from "vue-standard-schema"
 import * as z from "zod"
@@ -108,39 +109,81 @@ test("dynamic schema (getter)", () => {
   expect(errors.value).toBeUndefined()
 })
 
-test("async schema logs error and preserves previous state", () => {
-  const consoleError = mock(() => {})
-  const original = console.error
-  console.error = consoleError
+test("async schema updates refs after promise resolves", async () => {
+  const input = ref(1)
+  const asyncSchema: v.GenericSchema = {
+    "~standard": {
+      version: 1,
+      vendor: "test",
+      validate: () => Promise.resolve({ value: 999 }) as any,
+    },
+  } as any
 
-  try {
-    // Start with a sync schema that validates successfully.
-    const input = ref(1)
-    const syncSchema = v.pipe(v.number(), v.minValue(1))
-    const asyncSchema: v.GenericSchema = {
-      "~standard": {
-        version: 1,
-        vendor: "test",
-        validate: () => Promise.resolve({ value: 999 }) as any,
-      },
-    } as any
-    const schema = ref<v.GenericSchema>(syncSchema)
+  const { output, errors } = useParse({ input, schema: asyncSchema }, { flush: "sync" })
 
-    const { output, errors } = useParse({ input, schema }, { flush: "sync" })
+  // Not yet resolved — refs are still at initial (undefined) state.
+  expect(output.value).toBeUndefined()
+  expect(errors.value).toBeUndefined()
 
-    // Initial state: valid.
-    expect(output.value).toBe(1)
-    expect(errors.value).toBeUndefined()
+  await Promise.resolve()
 
-    // Switch to async schema — should log, not update output/errors.
-    schema.value = asyncSchema
+  expect(output.value).toBe(999)
+  expect(errors.value).toBeUndefined()
+})
 
-    expect(consoleError).toHaveBeenCalledTimes(1)
-    expect(consoleError.mock.calls[0]![0]).toMatch(/Promise/)
-    // Previous state must be preserved.
-    expect(output.value).toBe(1)
-    expect(errors.value).toBeUndefined()
-  } finally {
-    console.error = original
-  }
+test("async schema with errors updates refs after promise resolves", async () => {
+  const input = ref("bad")
+  const asyncSchema: v.GenericSchema = {
+    "~standard": {
+      version: 1,
+      vendor: "test",
+      validate: () => Promise.resolve({ issues: [{ message: "async error" }] }) as any,
+    },
+  } as any
+
+  const { output, errors } = useParse({ input, schema: asyncSchema }, { flush: "sync" })
+
+  await Promise.resolve()
+
+  expect(output.value).toBeUndefined()
+  expect(errors.value).toEqual([{ message: "async error" }])
+})
+
+test("stale async result is discarded when schema changes before resolve", async () => {
+  const input = ref(1)
+
+  let resolveFirst!: (v: StandardSchemaV1.Result<number>) => void
+  const slowSchema: v.GenericSchema = {
+    "~standard": {
+      version: 1,
+      vendor: "test",
+      validate: () => new Promise((res) => {
+        resolveFirst = res
+      }) as any,
+    },
+  } as any
+  const fastSchema: v.GenericSchema = {
+    "~standard": {
+      version: 1,
+      vendor: "test",
+      validate: () => Promise.resolve({ value: 42 }) as any,
+    },
+  } as any
+
+  const schema = ref<v.GenericSchema>(slowSchema)
+  const { output } = useParse({ input, schema }, { flush: "sync" })
+
+  // Switch to fast schema — this cancels the slow one.
+  schema.value = fastSchema
+
+  await Promise.resolve()
+
+  // Fast schema result is applied.
+  expect(output.value).toBe(42)
+
+  // Now the slow schema resolves — should be ignored.
+  resolveFirst({ value: 0 })
+  await Promise.resolve()
+
+  expect(output.value).toBe(42)
 })

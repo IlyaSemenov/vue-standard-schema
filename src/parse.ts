@@ -34,23 +34,34 @@ export function useParse<TSchema extends StandardSchemaV1, TErrors = StandardErr
   const errors = ref<TErrors | undefined>()
   const formatErrors = options.formatErrors ?? ((issues: StandardErrors) => issues as TErrors)
 
-  watchEffect(() => {
+  function applyResult(r: StandardSchemaV1.Result<Output>) {
+    result.value = r
+    if (r.issues) {
+      output.value = undefined
+      errors.value = formatErrors(r.issues)
+    } else {
+      output.value = r.value
+      errors.value = undefined
+    }
+  }
+
+  watchEffect((onCleanup) => {
     const schema = toValue(options.schema)
     const input = toValue(options.input)
     const resultOrPromise = schema["~standard"].validate(input)
 
     if (resultOrPromise instanceof Promise) {
-      console.error("Synchronous validation required, but schema returned a Promise.")
-      return
-    }
-
-    result.value = resultOrPromise
-    if (resultOrPromise.issues) {
-      output.value = undefined
-      errors.value = formatErrors(resultOrPromise.issues)
+      let cancelled = false
+      onCleanup(() => {
+        cancelled = true
+      })
+      resultOrPromise.then((r) => {
+        if (!cancelled) {
+          applyResult(r)
+        }
+      })
     } else {
-      output.value = resultOrPromise.value
-      errors.value = undefined
+      applyResult(resultOrPromise)
     }
   }, watchOptions)
 
