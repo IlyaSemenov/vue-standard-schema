@@ -246,12 +246,11 @@ export function useForm(
         errors.value = formatErrors(parseResult.issues)
         await options.onErrors?.(errors.value)
       } else {
-        const returnValue = await Promise.resolve()
-          .then(() =>
-            hasInput || parseResult
-              ? submitCallback?.(parseResult ? parseResult.value : input, ...args)
-              : submitCallback?.(...args),
-          )
+        const returnValue = await (
+          hasInput || parseResult
+            ? submitCallback?.(parseResult ? parseResult.value : input, ...args)
+            : submitCallback?.(...args)
+        )
         if (errors.value) {
           await options.onErrors?.(errors.value)
         } else {
