@@ -136,15 +136,20 @@ const { submit: submit2 } = useForm({
 // `submitting` will be true during submission of either form.
 ```
 
-## useForm shortcut
+## useForm with a separate submit handler
 
-All composable options are optional. If the only option you need is `submit`, there is a shortcut variant:
+The submit handler can be passed as a separate argument — either alone or together with an options object:
 
 ```ts
+// Submit handler only (shortcut):
 const { submit, submitting } = useForm(async () => {
-  // submitting is true during this callback.
   await api.post()
 })
+
+// Submit handler with options:
+const { submit, submitting } = useForm({ input, schema }, async (input) => {
+  await api.post(input)
+},)
 ```
 
 ## useForm return

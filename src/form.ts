@@ -179,6 +179,54 @@ export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], T
 ): UseFormReturn<TArgs, TResult, TErrors>
 
 //
+// No input, separate submit.
+//
+
+/**
+ * Vue 3 composable for handling form submission.
+ */
+export function useForm<Args extends unknown[], Result, TErrors = StandardErrors>(
+  options: BaseOptions<TErrors> & {
+    input?: never
+    schema?: never
+    submit?: never
+  },
+  submit: SubmitCallback<Args, Result>,
+): UseFormReturn<Args, Result, TErrors>
+
+//
+// Input only (no schema), separate submit.
+//
+
+/**
+ * Vue 3 composable for handling form submission.
+ */
+export function useForm<TInput, TArgs extends any[], TResult, TErrors = StandardErrors>(
+  options: BaseOptions<TErrors> & {
+    input: MaybeRefOrGetter<TInput>
+    schema?: never
+    submit?: never
+  },
+  submit: SubmitCallback<[TInput, ...TArgs], TResult>,
+): UseFormReturn<TArgs, TResult, TErrors>
+
+//
+// Schema, separate submit.
+//
+
+/**
+ * Vue 3 composable for handling form submission.
+ */
+export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], TResult, TErrors = StandardErrors>(
+  options: BaseOptions<TErrors> & {
+    input?: unknown
+    schema: MaybeRefOrGetter<TSchema>
+    submit?: never
+  },
+  submit: SubmitCallback<[StandardSchemaV1.InferOutput<TSchema>, ...TArgs], TResult>,
+): UseFormReturn<TArgs, TResult, TErrors>
+
+//
 // No input, callback only.
 //
 
@@ -213,11 +261,12 @@ export function useForm(
       submit?: SubmitCallback<unknown[], unknown>
     })
     | SubmitCallback<unknown[], unknown>,
+  externalSubmit?: SubmitCallback<unknown[], unknown>,
 ): UseFormReturn<unknown[], unknown, unknown> {
   const options
     = (typeof optionsOrSubmit === "function" ? undefined : optionsOrSubmit) ?? {}
   const submitCallback
-    = typeof optionsOrSubmit === "function" ? optionsOrSubmit : options?.submit
+    = typeof optionsOrSubmit === "function" ? optionsOrSubmit : externalSubmit ?? options?.submit
   const hasInput = options.input !== undefined
 
   const form = options.form ?? ref<HTMLFormElement>()

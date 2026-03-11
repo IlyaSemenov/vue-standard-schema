@@ -113,3 +113,34 @@ test("callback shortcut", () => {
   const { submit } = useForm(() => 123)
   expectTypeOf(submit).toEqualTypeOf<() => Promise<number | undefined>>()
 })
+
+test("separate submit, no input", () => {
+  const { submit } = useForm({}, async (input: number) => {
+    return `${input}`
+  })
+  expectTypeOf(submit).toEqualTypeOf<(input: number) => Promise<string | undefined>>()
+})
+
+test("separate submit, with schema", () => {
+  const { submit } = useForm(
+    {
+      input: { foo: "" as string | undefined },
+      schema: v.object({ foo: v.string() }),
+    },
+    async (input) => {
+      expectTypeOf(input).toEqualTypeOf<{ foo: string }>()
+    },
+  )
+  submit()
+})
+
+test("separate submit, input without schema", () => {
+  const { submit } = useForm(
+    { input: 123 },
+    async (input, commit: boolean) => {
+      expectTypeOf(input).toEqualTypeOf<number>()
+      return commit ? `${input}` : false
+    },
+  )
+  expectTypeOf(submit).toEqualTypeOf<(commit: boolean) => Promise<string | false | undefined>>()
+})

@@ -28,3 +28,15 @@ test("optional callback arg", () => {
   submit(123)
   submit(123, true)
 })
+
+test("separate submit, callback args", () => {
+  const { submit } = useForm(
+    { schema: v.string() },
+    async (input, _arg1: number, _arg2: boolean) => {
+      expectTypeOf(input).toEqualTypeOf<string>()
+    },
+  )
+  // @ts-expect-error arg1 is required
+  submit()
+  submit(123, true)
+})
