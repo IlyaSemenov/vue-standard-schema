@@ -8,24 +8,24 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/IlyaSemenov/vue-standard-schema"
+    "url": "git+https://github.com/IlyaSemenov/vue-standard-schema.git"
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./package.json": "./package.json"
   },
-  "main": "dist/index.cjs",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
   "files": [
-    "!src/**/*.test.*",
-    "dist",
-    "src"
+    "README.md",
+    "dist"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsdown",
     "lint": "eslint --fix .",
     "prepare": "lefthook install",
     "prepublishOnly": "bun run build",
@@ -41,6 +41,7 @@
     "@standard-schema/utils": "^0.3.0"
   },
   "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.2",
     "@changesets/cli": "^2.26.2",
     "@ilyasemenov/eslint-config": "^1.4.2",
     "@tsconfig/bun": "^1.0.10",
@@ -49,7 +50,8 @@
     "@vue/reactivity": "^3.4.29",
     "@vue/runtime-core": "^3.4.29",
     "eslint": "^9.35.0",
-    "tsup": "^8.5.0",
+    "publint": "^0.3.18",
+    "tsdown": "^0.20.3",
     "typescript": "^5.4.5",
     "valibot": "^1.1.0",
     "zod": "^4.1.7"
