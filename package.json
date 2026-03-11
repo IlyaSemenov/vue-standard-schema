@@ -8,7 +8,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/IlyaSemenov/vue-standard-schema.git"
+    "url": "git+https://github.com/IlyaSemenov/vue-form-submit.git"
   },
   "exports": {
     ".": {
