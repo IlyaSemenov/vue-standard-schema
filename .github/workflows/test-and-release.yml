@@ -2,6 +2,8 @@ name: Test and Release
 
 env:
   MAIN_REF: refs/heads/main
+  # For jdx/mise-action@v3, see https://github.com/jdx/mise-action/issues/394
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 on:
   push:
@@ -16,14 +18,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup mise
         uses: jdx/mise-action@v3
 
       # for changeset publish
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
 
