@@ -1,7 +1,7 @@
 {
   "name": "vue-standard-schema",
   "type": "module",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "packageManager": "bun@1.3.9",
   "description": "Vue3 composables for handling form submit with Standard Schema validation support",
   "author": "Ilya Semenov",

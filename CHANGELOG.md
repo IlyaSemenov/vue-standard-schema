@@ -1,5 +1,11 @@
 # vue-standard-schema
 
+## 4.0.2
+
+### Patch Changes
+
+- 69fff2b: Support async schema in `useParse()`.
+
 ## 4.0.1
 
 ### Patch Changes
