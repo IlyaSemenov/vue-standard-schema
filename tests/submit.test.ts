@@ -1,6 +1,6 @@
 import { reactive, ref } from "@vue/reactivity"
+import { describe, expect, test } from "bun:test"
 import * as v from "valibot"
-import { describe, expect, test } from "vitest"
 import type { FlatErrors } from "vue-standard-schema"
 import { flatten, useForm } from "vue-standard-schema"
 
@@ -18,12 +18,12 @@ describe("input", () => {
       },
     })
     expect(await submit()).toBeUndefined()
-    expect(errors.value).toStrictEqual({
+    expect(errors.value).toEqual({
       nested: { foo: ["Please enter foo."] },
     })
 
     input.foo = " test"
-    expect(await submit()).toStrictEqual({ input: { foo: "test" } })
+    expect(await submit()).toEqual({ input: { foo: "test" } })
     expect(errors.value).toBeUndefined()
   })
 
@@ -40,12 +40,12 @@ describe("input", () => {
       },
     })
     expect(await submit()).toBeUndefined()
-    expect(errors.value).toStrictEqual({
+    expect(errors.value).toEqual({
       nested: { foo: ["Please enter foo."] },
     })
 
     input.foo = " test"
-    expect(await submit()).toStrictEqual({ input: { foo: "test" } })
+    expect(await submit()).toEqual({ input: { foo: "test" } })
     expect(errors.value).toBeUndefined()
   })
 
@@ -62,16 +62,16 @@ describe("input", () => {
       },
     })
     expect(await submit()).toBeUndefined()
-    expect(errors.value).toStrictEqual({
+    expect(errors.value).toEqual({
       nested: { foo: ["Please enter foo."] },
     })
 
     input.value.foo = " test1"
-    expect(await submit()).toStrictEqual({ input: { foo: "test1" } })
+    expect(await submit()).toEqual({ input: { foo: "test1" } })
     expect(errors.value).toBeUndefined()
 
     input.value = { foo: "test2 " }
-    expect(await submit()).toStrictEqual({ input: { foo: "test2" } })
+    expect(await submit()).toEqual({ input: { foo: "test2" } })
     expect(errors.value).toBeUndefined()
   })
 })
@@ -86,10 +86,10 @@ test("dynamic schema", async () => {
   })
   minValue = 2
   await submit()
-  expect(errors.value).toMatchObject({ root: ["Min value: 2."] })
+  expect(errors.value).toEqual({ root: ["Min value: 2."] })
   minValue = 3
   await submit()
-  expect(errors.value).toMatchObject({ root: ["Min value: 3."] })
+  expect(errors.value).toEqual({ root: ["Min value: 3."] })
   minValue = 1
   await submit()
   expect(errors.value).toBeUndefined()
@@ -103,7 +103,7 @@ test("no schema", async () => {
       return { input }
     },
   })
-  expect(await submit()).toStrictEqual({ input: { foo: "" } })
+  expect(await submit()).toEqual({ input: { foo: "" } })
   expect(errors.value).toBeUndefined()
 })
 
@@ -117,7 +117,7 @@ test("no submit", async () => {
     formatErrors: flatten,
   })
   expect(await submit()).toBeUndefined()
-  expect(errors.value).toStrictEqual({ nested: { foo: ["Please enter foo."] } })
+  expect(errors.value).toEqual({ nested: { foo: ["Please enter foo."] } })
 
   input.foo = " test"
   expect(await submit()).toBeUndefined()
@@ -174,7 +174,7 @@ describe("submitted", () => {
       },
     })
     await submit()
-    expect(errors.value).toMatchObject({ root: ["Input required."] })
+    expect(errors.value).toEqual({ root: ["Input required."] })
     expect(submitted.value).toBe(false)
 
     input.value = "test"
@@ -184,7 +184,7 @@ describe("submitted", () => {
 
     input.value = ""
     await submit()
-    expect(errors.value).toMatchObject({ root: ["Input required."] })
+    expect(errors.value).toEqual({ root: ["Input required."] })
     expect(submitted.value).toBe(false)
   })
 
@@ -224,7 +224,7 @@ describe("onErrors", () => {
       },
     })
     await submit()
-    expect(callbackErrors.value).toMatchObject({ root: ["Input required."] })
+    expect(callbackErrors.value).toEqual({ root: ["Input required."] })
   })
 
   test("manual errors", async () => {
@@ -244,7 +244,7 @@ describe("onErrors", () => {
       },
     })
     await submit()
-    expect(callbackErrors.value).toMatchObject({ root: ["Input required."] })
+    expect(callbackErrors.value).toEqual({ root: ["Input required."] })
   })
 
   test("generic exception", async () => {

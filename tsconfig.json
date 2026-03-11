@@ -1,9 +1,10 @@
 {
-  "extends": "tsconfig-vite-node",
+  "extends": "@tsconfig/bun/tsconfig.json",
   "compilerOptions": {
     "lib": ["DOM", "ESNext"],
     "paths": {
       "vue-standard-schema": ["./src"]
-    }
+    },
+    "types": ["bun"]
   }
 }

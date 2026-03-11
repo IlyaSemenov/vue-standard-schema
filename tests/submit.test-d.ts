@@ -1,6 +1,6 @@
 import { ref } from "@vue/reactivity"
+import { expectTypeOf, test } from "bun:test"
 import * as v from "valibot"
-import { expectTypeOf, test } from "vitest"
 import { useForm } from "vue-standard-schema"
 import * as z from "zod"
 

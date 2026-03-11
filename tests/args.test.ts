@@ -1,6 +1,6 @@
 import { ref } from "@vue/reactivity"
+import { expect, test } from "bun:test"
 import * as v from "valibot"
-import { expect, test } from "vitest"
 import { flatten, useForm } from "vue-standard-schema"
 
 test("without input", async () => {
@@ -10,7 +10,7 @@ test("without input", async () => {
     },
   })
 
-  expect(await submit("foo")).toEqual({ arg1: "foo" })
+  expect(await submit("foo")).toEqual({ arg1: "foo", arg2: undefined })
   expect(await submit("foo", "bar")).toEqual({ arg1: "foo", arg2: "bar" })
 })
 
@@ -22,7 +22,7 @@ test("input without schema", async () => {
     },
   })
 
-  expect(await submit()).toEqual({ input: 123, arg1: "foo" })
+  expect(await submit()).toEqual({ input: 123, arg1: "foo", arg2: undefined })
   expect(await submit("bar", "baz")).toEqual({ input: 123, arg1: "bar", arg2: "baz" })
 })
 
@@ -46,17 +46,17 @@ test("input with schema", async () => {
   })
 
   expect(await submit()).toBeUndefined()
-  expect(errors.value).toStrictEqual({ nested: { foo: ["Please enter foo."] } })
+  expect(errors.value).toEqual({ nested: { foo: ["Please enter foo."] } })
 
   input.foo = " test"
-  expect(await submit()).toStrictEqual({ input: { foo: "test" } })
+  expect(await submit()).toEqual({ input: { foo: "test" } })
   expect(errors.value).toBeUndefined()
 
   expect(await submit(false)).toBeUndefined()
-  expect(errors.value).toStrictEqual({ nested: { foo: ["test not allowed."] } })
+  expect(errors.value).toEqual({ nested: { foo: ["test not allowed."] } })
 
   expect(await submit(false, "Boom")).toBeUndefined()
-  expect(errors.value).toStrictEqual({ nested: { foo: ["Boom"] } })
+  expect(errors.value).toEqual({ nested: { foo: ["Boom"] } })
 })
 
 test("callback only", async () => {

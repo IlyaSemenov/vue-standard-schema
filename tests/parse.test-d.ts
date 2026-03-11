@@ -1,5 +1,5 @@
+import { expectTypeOf, test } from "bun:test"
 import * as v from "valibot"
-import { expectTypeOf, test } from "vitest"
 import type { FlatErrors, StandardErrors } from "vue-standard-schema"
 import { flatten, useParse } from "vue-standard-schema"
 

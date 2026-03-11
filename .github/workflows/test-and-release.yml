@@ -18,34 +18,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Enable corepack
-        run: corepack enable
-
       - name: Setup mise
         uses: jdx/mise-action@v3
 
+      # for changeset publish
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
       - name: Install deps
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm run -r build
+        run: bun run build
 
       - name: Test packages
-        run: pnpm run -r test
+        run: bun run test
 
       - name: Capture new release versions
         if: ${{ github.ref == env.MAIN_REF }}
         run: |
-          if pnpx @changesets/cli status --output=release.json; then
-            echo "RELEASE=Version $(jq -r '.releases[0].newVersion' release.json)" >> "$GITHUB_ENV"
-            rm release.json
+          if bunx @changesets/cli status --output=/tmp/release.json; then
+            echo "RELEASE=Version $(jq -r '.releases[0].newVersion' /tmp/release.json)" >> "$GITHUB_ENV"
           fi
 
       - name: Create Release Pull Request or Publish to npm
         if: ${{ github.ref == env.MAIN_REF }}
         uses: changesets/action@v1
         with:
-          publish: pnpm changeset publish
+          publish: npx changeset publish
           title: ${{ env.RELEASE }}
           commit: ${{ env.RELEASE }}
         env:

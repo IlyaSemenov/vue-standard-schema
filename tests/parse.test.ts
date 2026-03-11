@@ -1,6 +1,6 @@
 import { reactive } from "@vue/reactivity"
+import { expect, test } from "bun:test"
 import * as v from "valibot"
-import { expect, test } from "vitest"
 import { flatten, useParse } from "vue-standard-schema"
 import * as z from "zod"
 
@@ -20,7 +20,7 @@ test("parse with valibot", async () => {
   })
 
   expect(output.value).toBeUndefined()
-  expect(errors.value).toMatchObject({
+  expect(errors.value).toEqual({
     nested: {
       age: ["Invalid type: Expected number but received \"\""],
     },
@@ -48,7 +48,7 @@ test("parse with zod", async () => {
   })
 
   expect(output.value).toBeUndefined()
-  expect(errors.value).toMatchObject({
+  expect(errors.value).toEqual({
     nested: {
       email: ["Invalid email"],
     },
