@@ -1,5 +1,16 @@
 # vue-form-submit
 
+## 5.0.0
+
+### Major Changes
+
+- 89f162a: Rename package to `vue-form-submit`.
+- 4278ef5: Rename `useForm()` to `useSubmit()` and rename the `submit` option to `onSubmit`.
+
+### Minor Changes
+
+- fc14ece: Add `useForm(options, submitHandler)` overload.
+
 ## 4.0.2
 
 ### Patch Changes
