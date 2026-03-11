@@ -1,7 +1,7 @@
 import { ref } from "@vue/reactivity"
 import { expect, test } from "bun:test"
 import * as v from "valibot"
-import { flatten, useForm } from "vue-standard-schema"
+import { flatten, useForm } from "vue-form-submit"
 
 test("without input", async () => {
   const { submit } = useForm({

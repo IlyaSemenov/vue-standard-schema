@@ -60,3 +60,5 @@ jobs:
           commit: ${{ env.RELEASE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # After first publish, setup OIDC at https://www.npmjs.com/package/vue-form-submit/access and delete next line:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

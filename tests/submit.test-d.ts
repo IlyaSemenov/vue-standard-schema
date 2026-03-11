@@ -1,7 +1,7 @@
 import { ref } from "@vue/reactivity"
 import { expectTypeOf, test } from "bun:test"
 import * as v from "valibot"
-import { useForm } from "vue-standard-schema"
+import { useForm } from "vue-form-submit"
 import * as z from "zod"
 
 test("input with valibot schema", () => {

@@ -1,7 +1,7 @@
 import { expectTypeOf, test } from "bun:test"
 import * as v from "valibot"
-import type { FlatErrors, StandardErrors } from "vue-standard-schema"
-import { flatten, useForm } from "vue-standard-schema"
+import type { FlatErrors, StandardErrors } from "vue-form-submit"
+import { flatten, useForm } from "vue-form-submit"
 import * as z from "zod"
 
 test("untyped errors without input", () => {

@@ -1,6 +1,6 @@
 import { expectTypeOf, test } from "bun:test"
 import * as v from "valibot"
-import { useForm } from "vue-standard-schema"
+import { useForm } from "vue-form-submit"
 
 test("callback args", () => {
   const { submit } = useForm({

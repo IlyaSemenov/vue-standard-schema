@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "vue-standard-schema",
+      "name": "vue-form-submit",
       "dependencies": {
         "@standard-schema/spec": "^1.0.0",
         "@standard-schema/utils": "^0.3.0",

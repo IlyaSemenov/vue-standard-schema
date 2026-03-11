@@ -1,7 +1,7 @@
 import { expectTypeOf, test } from "bun:test"
 import * as v from "valibot"
-import type { FlatErrors, StandardErrors } from "vue-standard-schema"
-import { flatten, useParse } from "vue-standard-schema"
+import type { FlatErrors, StandardErrors } from "vue-form-submit"
+import { flatten, useParse } from "vue-form-submit"
 
 test("basic", () => {
   const { errors, output } = useParse({

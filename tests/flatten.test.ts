@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import { flatten } from "vue-standard-schema"
+import { flatten } from "vue-form-submit"
 
 test("empty issues", () => {
   expect(flatten([])).toEqual({})

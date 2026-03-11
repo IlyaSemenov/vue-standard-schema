@@ -1,8 +1,8 @@
 import { reactive, ref } from "@vue/reactivity"
 import { describe, expect, test } from "bun:test"
 import * as v from "valibot"
-import type { FlatErrors } from "vue-standard-schema"
-import { flatten, useForm } from "vue-standard-schema"
+import type { FlatErrors } from "vue-form-submit"
+import { flatten, useForm } from "vue-form-submit"
 
 describe("input", () => {
   test("plain", async () => {

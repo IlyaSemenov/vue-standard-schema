@@ -2,7 +2,7 @@ import type { StandardSchemaV1 } from "@standard-schema/spec"
 import { reactive, ref } from "@vue/reactivity"
 import { expect, test } from "bun:test"
 import * as v from "valibot"
-import { flatten, useParse } from "vue-standard-schema"
+import { flatten, useParse } from "vue-form-submit"
 import * as z from "zod"
 
 test("parse with valibot", async () => {

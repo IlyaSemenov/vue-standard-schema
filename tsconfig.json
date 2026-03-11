@@ -3,7 +3,7 @@
   "compilerOptions": {
     "lib": ["DOM", "ESNext"],
     "paths": {
-      "vue-standard-schema": ["./src"]
+      "vue-form-submit": ["./src"]
     },
     "types": ["bun"]
   }

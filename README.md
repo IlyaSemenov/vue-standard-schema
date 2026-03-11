@@ -1,4 +1,4 @@
-# vue-standard-schema
+# vue-form-submit
 
 Simple Vue 3 composables for handling form submission.
 
@@ -11,7 +11,7 @@ Full TypeScript support with type inference.
 ## Install
 
 ```sh
-npm install vue-standard-schema
+npm install vue-form-submit
 ```
 
 ## Use
@@ -19,7 +19,7 @@ npm install vue-standard-schema
 ```vue
 <script setup lang="ts">
 import * as v from "valibot"
-import { useForm } from "vue-standard-schema"
+import { useForm } from "vue-form-submit"
 
 // Store input data however you prefer, e.g. with Vue reactive or ref.
 const fields = reactive({
@@ -203,7 +203,7 @@ Use the `formatErrors` option to format or structure them differently. For examp
 ```vue
 <script setup lang="ts">
 import * as v from "valibot"
-import { flatten, useForm } from "vue-standard-schema"
+import { flatten, useForm } from "vue-form-submit"
 
 const fields = reactive({
   name: "",
@@ -310,7 +310,7 @@ Example with Valibot:
 ```vue
 <script setup lang="ts">
 import * as v from "valibot"
-import { flatten, useParse } from "vue-standard-schema"
+import { flatten, useParse } from "vue-form-submit"
 
 const input = reactive({
   age: "" as string | number,

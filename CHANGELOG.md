@@ -1,4 +1,4 @@
-# vue-standard-schema
+# vue-form-submit
 
 ## 4.0.2
 
