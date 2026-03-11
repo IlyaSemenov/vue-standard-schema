@@ -4,7 +4,7 @@ import { ref, toValue } from "@vue/reactivity"
 
 import type { ErrorsFormatter, StandardErrors } from "./errors"
 
-export interface UseFormReturn<TArgs extends any[], TResult, TErrors> {
+export interface UseSubmitReturn<TArgs extends any[], TResult, TErrors> {
   /**
    * The form element ref.
    *
@@ -21,27 +21,27 @@ export interface UseFormReturn<TArgs extends any[], TResult, TErrors> {
    *
    * - Run HTML5 validation (if the form ref is set).
    * - Run Standard Schema validation (if the schema is provided).
-   * - Call the submit callback (if provided).
+   * - Call the `onSubmit` callback (if provided).
    *
-   * Arguments passed to this function are forwarded to the submit callback,
-   * prepended with the (possibly validated) form input (unless using the shortcut variant of useForm).
+   * Arguments passed to this function are forwarded to the `onSubmit` callback,
+   * prepended with the (possibly validated) form input (unless using the shortcut variant of `useSubmit`).
    *
-   * During execution, `submitting` is true.
+   * While submission is in progress, `submitting` is true.
    * After successful execution, `submitted` is true.
    */
   submit: (...args: TArgs) => Promise<TResult | undefined>
   /**
-   * Whether the form submit callback is currently executing.
+   * Whether a submission is currently in progress.
    *
    * Use this to disable the submit button.
    *
-   * `useForm` will also skip submission if this is already `true`.
+   * `useSubmit` will also skip submission if this is already `true`.
    */
   submitting: Ref<boolean>
   /**
    * Has the form been successfully submitted?
    *
-   * Feel free to reset. `useForm` doesn't depend on this value.
+   * Feel free to reset. `useSubmit` doesn't depend on this value.
    */
   submitted: Ref<boolean>
   /**
@@ -58,7 +58,7 @@ interface BaseOptions<TErrors> {
   /**
    * Error callback.
    *
-   * Called (and awaited) when validation fails or when `errors.value` is set by the submit handler.
+   * Called (and awaited) when validation fails or when `errors.value` is set by the `onSubmit` handler.
    */
   onErrors?: (errors: TErrors) => any
   /**
@@ -90,12 +90,12 @@ type SubmitCallback<Args extends any[], Result> = (
 /**
  * Vue 3 composable for handling form submission.
  */
-export function useForm<Args extends unknown[], Result, TErrors = StandardErrors>(
+export function useSubmit<Args extends unknown[], Result, TErrors = StandardErrors>(
   options: BaseOptions<TErrors> & {
     input?: never
     schema?: never
     /**
-     * Form submit callback.
+     * onSubmit callback.
      *
      * Only called if:
      * - The form is not already being submitted (`submitting.value` is falsy).
@@ -103,12 +103,12 @@ export function useForm<Args extends unknown[], Result, TErrors = StandardErrors
      *
      * Arguments are passed through from the submit function.
      *
-     * During execution, `submitting` is true.
+     * While submission is in progress, `submitting` is true.
      * After successful execution, `submitted` is true.
      */
-    submit?: SubmitCallback<Args, Result>
+    onSubmit?: SubmitCallback<Args, Result>
   },
-): UseFormReturn<Args, Result, TErrors>
+): UseSubmitReturn<Args, Result, TErrors>
 
 //
 // Input only (no schema).
@@ -119,7 +119,7 @@ export function useForm<Args extends unknown[], Result, TErrors = StandardErrors
  *
  * Validates the input using Standard Schema.
  */
-export function useForm<TInput, TArgs extends any[], TResult, TErrors = StandardErrors>(
+export function useSubmit<TInput, TArgs extends any[], TResult, TErrors = StandardErrors>(
   options: BaseOptions<TErrors> & {
     /**
      * The input data: a plain value, ref, or getter.
@@ -127,7 +127,7 @@ export function useForm<TInput, TArgs extends any[], TResult, TErrors = Standard
     input: MaybeRefOrGetter<TInput>
     schema?: never
     /**
-     * Form submit callback.
+     * onSubmit callback.
      *
      * Only called if:
      * - The form is not already being submitted (`submitting.value` is falsy).
@@ -135,12 +135,12 @@ export function useForm<TInput, TArgs extends any[], TResult, TErrors = Standard
      *
      * The first argument is the form input; the remaining arguments are passed through from the submit function.
      *
-     * During execution, `submitting` is true.
+     * While submission is in progress, `submitting` is true.
      * After successful execution, `submitted` is true.
      */
-    submit?: SubmitCallback<[TInput, ...TArgs], TResult>
+    onSubmit?: SubmitCallback<[TInput, ...TArgs], TResult>
   },
-): UseFormReturn<TArgs, TResult, TErrors>
+): UseSubmitReturn<TArgs, TResult, TErrors>
 
 //
 // Schema.
@@ -151,7 +151,7 @@ export function useForm<TInput, TArgs extends any[], TResult, TErrors = Standard
  *
  * Validates the input using Standard Schema.
  */
-export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], TResult, TErrors = StandardErrors>(
+export function useSubmit<TSchema extends StandardSchemaV1, TArgs extends any[], TResult, TErrors = StandardErrors>(
   options: BaseOptions<TErrors> & {
     /**
      * The input data to validate (plain value, ref, or getter).
@@ -162,7 +162,7 @@ export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], T
      */
     schema: MaybeRefOrGetter<TSchema>
     /**
-     * Form submit callback.
+     * onSubmit callback.
      *
      * Only called if:
      * - The form is not already being submitted (`submitting.value` is falsy).
@@ -171,12 +171,12 @@ export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], T
      *
      * The first argument is the validated input; the remaining arguments are passed through from the submit function.
      *
-     * During execution, `submitting` is true.
+     * While submission is in progress, `submitting` is true.
      * After successful execution, `submitted` is true.
      */
-    submit?: SubmitCallback<[StandardSchemaV1.InferOutput<TSchema>, ...TArgs], TResult>
+    onSubmit?: SubmitCallback<[StandardSchemaV1.InferOutput<TSchema>, ...TArgs], TResult>
   },
-): UseFormReturn<TArgs, TResult, TErrors>
+): UseSubmitReturn<TArgs, TResult, TErrors>
 
 //
 // No input, separate submit.
@@ -185,14 +185,14 @@ export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], T
 /**
  * Vue 3 composable for handling form submission.
  */
-export function useForm<Args extends unknown[], Result, TErrors = StandardErrors>(
+export function useSubmit<Args extends unknown[], Result, TErrors = StandardErrors>(
   options: BaseOptions<TErrors> & {
     input?: never
     schema?: never
-    submit?: never
+    onSubmit?: never
   },
-  submit: SubmitCallback<Args, Result>,
-): UseFormReturn<Args, Result, TErrors>
+  onSubmit: SubmitCallback<Args, Result>,
+): UseSubmitReturn<Args, Result, TErrors>
 
 //
 // Input only (no schema), separate submit.
@@ -201,14 +201,14 @@ export function useForm<Args extends unknown[], Result, TErrors = StandardErrors
 /**
  * Vue 3 composable for handling form submission.
  */
-export function useForm<TInput, TArgs extends any[], TResult, TErrors = StandardErrors>(
+export function useSubmit<TInput, TArgs extends any[], TResult, TErrors = StandardErrors>(
   options: BaseOptions<TErrors> & {
     input: MaybeRefOrGetter<TInput>
     schema?: never
-    submit?: never
+    onSubmit?: never
   },
-  submit: SubmitCallback<[TInput, ...TArgs], TResult>,
-): UseFormReturn<TArgs, TResult, TErrors>
+  onSubmit: SubmitCallback<[TInput, ...TArgs], TResult>,
+): UseSubmitReturn<TArgs, TResult, TErrors>
 
 //
 // Schema, separate submit.
@@ -217,14 +217,14 @@ export function useForm<TInput, TArgs extends any[], TResult, TErrors = Standard
 /**
  * Vue 3 composable for handling form submission.
  */
-export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], TResult, TErrors = StandardErrors>(
+export function useSubmit<TSchema extends StandardSchemaV1, TArgs extends any[], TResult, TErrors = StandardErrors>(
   options: BaseOptions<TErrors> & {
     input?: unknown
     schema: MaybeRefOrGetter<TSchema>
-    submit?: never
+    onSubmit?: never
   },
-  submit: SubmitCallback<[StandardSchemaV1.InferOutput<TSchema>, ...TArgs], TResult>,
-): UseFormReturn<TArgs, TResult, TErrors>
+  onSubmit: SubmitCallback<[StandardSchemaV1.InferOutput<TSchema>, ...TArgs], TResult>,
+): UseSubmitReturn<TArgs, TResult, TErrors>
 
 //
 // No input, callback only.
@@ -233,9 +233,9 @@ export function useForm<TSchema extends StandardSchemaV1, TArgs extends any[], T
 /**
  * Vue 3 composable for handling form submission.
  */
-export function useForm<TArgs extends any[], TResult>(
+export function useSubmit<TArgs extends any[], TResult>(
 /**
- * Form submit callback.
+ * onSubmit callback.
  *
  * Only called if:
  * - The form is not already being submitted (`submitting.value` is falsy).
@@ -243,30 +243,30 @@ export function useForm<TArgs extends any[], TResult>(
  *
  * Arguments are passed through from the submit function.
  *
- * During execution, `submitting` is true.
+ * While submission is in progress, `submitting` is true.
  * After successful execution, `submitted` is true.
  */
-  submit?: SubmitCallback<TArgs, TResult>,
-): UseFormReturn<TArgs, TResult, StandardErrors>
+  onSubmit?: SubmitCallback<TArgs, TResult>,
+): UseSubmitReturn<TArgs, TResult, StandardErrors>
 
 //
 // Implementation.
 //
 
-export function useForm(
-  optionsOrSubmit?:
+export function useSubmit(
+  optionsOrOnSubmit?:
     | (BaseOptions<unknown> & {
       input?: unknown
       schema?: MaybeRefOrGetter<StandardSchemaV1>
-      submit?: SubmitCallback<unknown[], unknown>
+      onSubmit?: SubmitCallback<unknown[], unknown>
     })
     | SubmitCallback<unknown[], unknown>,
-  externalSubmit?: SubmitCallback<unknown[], unknown>,
-): UseFormReturn<unknown[], unknown, unknown> {
+  externalOnSubmit?: SubmitCallback<unknown[], unknown>,
+): UseSubmitReturn<unknown[], unknown, unknown> {
   const options
-    = (typeof optionsOrSubmit === "function" ? undefined : optionsOrSubmit) ?? {}
-  const submitCallback
-    = typeof optionsOrSubmit === "function" ? optionsOrSubmit : externalSubmit ?? options?.submit
+    = (typeof optionsOrOnSubmit === "function" ? undefined : optionsOrOnSubmit) ?? {}
+  const onSubmitCallback
+    = typeof optionsOrOnSubmit === "function" ? optionsOrOnSubmit : externalOnSubmit ?? options?.onSubmit
   const hasInput = options.input !== undefined
 
   const form = options.form ?? ref<HTMLFormElement>()
@@ -297,8 +297,8 @@ export function useForm(
       } else {
         const returnValue = await (
           hasInput || parseResult
-            ? submitCallback?.(parseResult ? parseResult.value : input, ...args)
-            : submitCallback?.(...args)
+            ? onSubmitCallback?.(parseResult ? parseResult.value : input, ...args)
+            : onSubmitCallback?.(...args)
         )
         if (errors.value) {
           await options.onErrors?.(errors.value)

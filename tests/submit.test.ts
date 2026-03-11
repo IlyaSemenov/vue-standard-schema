@@ -2,18 +2,18 @@ import { reactive, ref } from "@vue/reactivity"
 import { describe, expect, test } from "bun:test"
 import * as v from "valibot"
 import type { FlatErrors } from "vue-form-submit"
-import { flatten, useForm } from "vue-form-submit"
+import { flatten, useSubmit } from "vue-form-submit"
 
 describe("input", () => {
   test("plain", async () => {
     const input = { foo: "" }
-    const { submit, errors } = useForm({
+    const { submit, errors } = useSubmit({
       input,
       schema: v.object({
         foo: v.pipe(v.string(), v.trim(), v.minLength(1, "Please enter foo.")),
       }),
       formatErrors: flatten,
-      async submit(input) {
+      async onSubmit(input) {
         return { input }
       },
     })
@@ -29,13 +29,13 @@ describe("input", () => {
 
   test("reactive", async () => {
     const input = reactive({ foo: "" })
-    const { submit, errors } = useForm({
+    const { submit, errors } = useSubmit({
       input,
       schema: v.object({
         foo: v.pipe(v.string(), v.trim(), v.minLength(1, "Please enter foo.")),
       }),
       formatErrors: flatten,
-      async submit(input) {
+      async onSubmit(input) {
         return { input }
       },
     })
@@ -51,13 +51,13 @@ describe("input", () => {
 
   test("ref", async () => {
     const input = ref({ foo: "" })
-    const { submit, errors } = useForm({
+    const { submit, errors } = useSubmit({
       input,
       schema: v.object({
         foo: v.pipe(v.string(), v.trim(), v.minLength(1, "Please enter foo.")),
       }),
       formatErrors: flatten,
-      async submit(input) {
+      async onSubmit(input) {
         return { input }
       },
     })
@@ -79,7 +79,7 @@ describe("input", () => {
 test("dynamic schema", async () => {
   let minValue: number
   const input = ref(1)
-  const { submit, errors } = useForm({
+  const { submit, errors } = useSubmit({
     input,
     schema: () => v.pipe(v.number(), v.minValue(minValue, `Min value: ${minValue}.`)),
     formatErrors: flatten,
@@ -97,9 +97,9 @@ test("dynamic schema", async () => {
 
 test("no schema", async () => {
   const input = reactive({ foo: "" })
-  const { submit, errors } = useForm({
+  const { submit, errors } = useSubmit({
     input,
-    async submit(input) {
+    async onSubmit(input) {
       return { input }
     },
   })
@@ -107,9 +107,9 @@ test("no schema", async () => {
   expect(errors.value).toBeUndefined()
 })
 
-test("no submit", async () => {
+test("no onSubmit", async () => {
   const input = reactive({ foo: "" })
-  const { submit, errors } = useForm({
+  const { submit, errors } = useSubmit({
     input,
     schema: v.object({
       foo: v.pipe(v.string(), v.trim(), v.minLength(1, "Please enter foo.")),
@@ -125,24 +125,24 @@ test("no submit", async () => {
 })
 
 test("empty options", async () => {
-  const { submit } = useForm({})
+  const { submit } = useSubmit({})
   expect(await submit()).toBeUndefined()
 })
 
 test("no options", async () => {
-  const { submit } = useForm()
+  const { submit } = useSubmit()
   expect(await submit()).toBeUndefined()
 })
 
 test("submit shortcut", async () => {
-  const { submit } = useForm(() => 123)
+  const { submit } = useSubmit(() => 123)
   expect(await submit()).toBe(123)
 })
 
 describe("submitted", () => {
   test("schema errors", async () => {
     const input = { foo: "" }
-    const { submit, submitted } = useForm({
+    const { submit, submitted } = useSubmit({
       input,
       schema: v.object({
         foo: v.pipe(v.string(), v.minLength(1)),
@@ -163,11 +163,11 @@ describe("submitted", () => {
 
   test("manual errors", async () => {
     const input = ref("")
-    const { submit, submitted, errors } = useForm({
+    const { submit, submitted, errors } = useSubmit({
       input,
       schema: v.string(),
       formatErrors: flatten,
-      submit(input) {
+      onSubmit(input) {
         if (!input) {
           errors.value = { root: ["Input required."] }
         }
@@ -190,11 +190,11 @@ describe("submitted", () => {
 
   test("exception", async () => {
     const input = ref("")
-    const { submit, submitted, errors } = useForm({
+    const { submit, submitted, errors } = useSubmit({
       input,
       schema: v.string(),
       formatErrors: flatten,
-      submit(input) {
+      onSubmit(input) {
         if (!input) {
           throw new Error("Fail")
         }
@@ -215,7 +215,7 @@ describe("onErrors", () => {
   test("schema errors", async () => {
     const input = ref("")
     const callbackErrors = ref<FlatErrors>()
-    const { submit } = useForm({
+    const { submit } = useSubmit({
       input,
       schema: v.pipe(v.string(), v.minLength(1, "Input required.")),
       formatErrors: flatten,
@@ -230,11 +230,11 @@ describe("onErrors", () => {
   test("manual errors", async () => {
     const input = ref("")
     const callbackErrors = ref<FlatErrors>()
-    const { submit, errors } = useForm({
+    const { submit, errors } = useSubmit({
       input,
       schema: v.string(),
       formatErrors: flatten,
-      submit(input) {
+      onSubmit(input) {
         if (!input) {
           errors.value = { root: ["Input required."] }
         }
@@ -250,11 +250,11 @@ describe("onErrors", () => {
   test("generic exception", async () => {
     const input = ref("")
     const callbackErrors = ref<FlatErrors>()
-    const { submit } = useForm({
+    const { submit } = useSubmit({
       input,
       schema: v.string(),
       formatErrors: flatten,
-      submit(input) {
+      onSubmit(input) {
         if (!input) {
           throw new Error("Fail")
         }
@@ -275,7 +275,7 @@ describe("submitting guard", () => {
     const blocker = new Promise<void>((r) => {
       resolve = r
     })
-    const { submit, submitting } = useForm(async () => {
+    const { submit, submitting } = useSubmit(async () => {
       callCount++
       await blocker
     })
@@ -299,7 +299,7 @@ describe("submitting guard", () => {
     const blocker = new Promise<void>((r) => {
       resolve = r
     })
-    const { submit, submitting } = useForm(() => blocker)
+    const { submit, submitting } = useSubmit(() => blocker)
 
     expect(submitting.value).toBe(false)
     const done = submit()
@@ -324,11 +324,11 @@ test("user-provided refs", async () => {
     submitting: submitting1,
     submitted: submitted1,
     errors: errors1,
-  } = useForm({
+  } = useSubmit({
     input,
     schema: v.string(),
     formatErrors: flatten,
-    submit() {
+    onSubmit() {
       //
     },
     form,

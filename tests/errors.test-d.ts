@@ -1,18 +1,18 @@
 import { expectTypeOf, test } from "bun:test"
 import * as v from "valibot"
 import type { FlatErrors, StandardErrors } from "vue-form-submit"
-import { flatten, useForm } from "vue-form-submit"
+import { flatten, useSubmit } from "vue-form-submit"
 import * as z from "zod"
 
 test("untyped errors without input", () => {
-  const { errors } = useForm()
+  const { errors } = useSubmit()
   expectTypeOf(errors.value).toEqualTypeOf<StandardErrors | undefined>()
 })
 
 test("untyped errors with input", () => {
-  const { errors } = useForm({
+  const { errors } = useSubmit({
     input: { foo: "Foo" },
-    submit() {
+    onSubmit() {
       expectTypeOf(errors.value).toEqualTypeOf<StandardErrors | undefined>()
       errors.value = [{ message: "error", path: ["bar"] }]
     },
@@ -24,7 +24,7 @@ test("untyped errors with input", () => {
 
 test("typed errors with valibot schema", () => {
   const schema = v.object({ foo: v.string() })
-  const { errors } = useForm({
+  const { errors } = useSubmit({
     schema,
     formatErrors: flatten,
     onErrors(errors) {
@@ -39,7 +39,7 @@ test("typed errors with valibot schema", () => {
 
 test("typed errors with zod schema", () => {
   const schema = z.object({ email: z.string() })
-  const { errors } = useForm({
+  const { errors } = useSubmit({
     schema,
     formatErrors: flatten,
     onErrors(errors) {

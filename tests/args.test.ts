@@ -1,11 +1,11 @@
 import { ref } from "@vue/reactivity"
 import { expect, test } from "bun:test"
 import * as v from "valibot"
-import { flatten, useForm } from "vue-form-submit"
+import { flatten, useSubmit } from "vue-form-submit"
 
 test("without input", async () => {
-  const { submit } = useForm({
-    async submit(arg1, arg2?: string) {
+  const { submit } = useSubmit({
+    async onSubmit(arg1, arg2?: string) {
       return { arg1, arg2 }
     },
   })
@@ -15,9 +15,9 @@ test("without input", async () => {
 })
 
 test("input without schema", async () => {
-  const { submit } = useForm({
+  const { submit } = useSubmit({
     input: 123,
-    async submit(input, arg1 = "foo", arg2?: string) {
+    async onSubmit(input, arg1 = "foo", arg2?: string) {
       return { input, arg1, arg2 }
     },
   })
@@ -28,13 +28,13 @@ test("input without schema", async () => {
 
 test("input with schema", async () => {
   const input = { foo: "" }
-  const { submit, errors } = useForm({
+  const { submit, errors } = useSubmit({
     input,
     schema: v.object({
       foo: v.pipe(v.string(), v.trim(), v.minLength(1, "Please enter foo.")),
     }),
     formatErrors: flatten,
-    async submit(input, allowTest = true, error = "test not allowed.") {
+    async onSubmit(input, allowTest = true, error = "test not allowed.") {
       if (!allowTest && input.foo === "test") {
         errors.value = {
           nested: { foo: [error] },
@@ -60,7 +60,7 @@ test("input with schema", async () => {
 })
 
 test("callback only", async () => {
-  const { submit } = useForm(
+  const { submit } = useSubmit(
     (value: number, multiplier = 2) => value * multiplier,
   )
   expect(await submit(5)).toBe(10)
@@ -68,9 +68,9 @@ test("callback only", async () => {
 })
 
 test("empty input", async () => {
-  const { submit } = useForm({
+  const { submit } = useSubmit({
     input: ref(undefined),
-    async submit(input, arg: string) {
+    async onSubmit(input, arg: string) {
       return { input, arg }
     },
   })
@@ -79,9 +79,9 @@ test("empty input", async () => {
 })
 
 test("undefined input", async () => {
-  const { submit } = useForm({
+  const { submit } = useSubmit({
     input: undefined,
-    async submit(input, arg: string) {
+    async onSubmit(input, arg: string) {
       return { input, arg }
     },
   })
@@ -90,10 +90,10 @@ test("undefined input", async () => {
 })
 
 test("undefined input with schema", async () => {
-  const { submit } = useForm({
+  const { submit } = useSubmit({
     input: undefined,
     schema: v.pipe(v.any(), v.transform(() => 123)),
-    async submit(input, arg: string) {
+    async onSubmit(input, arg: string) {
       return { input, arg }
     },
   })

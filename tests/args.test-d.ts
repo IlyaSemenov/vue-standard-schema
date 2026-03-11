@@ -1,11 +1,11 @@
 import { expectTypeOf, test } from "bun:test"
 import * as v from "valibot"
-import { useForm } from "vue-form-submit"
+import { useSubmit } from "vue-form-submit"
 
 test("callback args", () => {
-  const { submit } = useForm({
+  const { submit } = useSubmit({
     schema: v.string(),
-    async submit(input, _arg1: number, _arg2: boolean) {
+    async onSubmit(input, _arg1: number, _arg2: boolean) {
       expectTypeOf(input).toEqualTypeOf<string>()
     },
   })
@@ -17,9 +17,9 @@ test("callback args", () => {
 })
 
 test("optional callback arg", () => {
-  const { submit } = useForm({
+  const { submit } = useSubmit({
     schema: v.string(),
-    async submit(input, _arg1: number, _arg2?: boolean) {
+    async onSubmit(input, _arg1: number, _arg2?: boolean) {
       expectTypeOf(input).toEqualTypeOf<string>()
     },
   })
@@ -30,7 +30,7 @@ test("optional callback arg", () => {
 })
 
 test("separate submit, callback args", () => {
-  const { submit } = useForm(
+  const { submit } = useSubmit(
     { schema: v.string() },
     async (input, _arg1: number, _arg2: boolean) => {
       expectTypeOf(input).toEqualTypeOf<string>()

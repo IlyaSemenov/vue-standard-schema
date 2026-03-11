@@ -1,66 +1,66 @@
 import { ref } from "@vue/reactivity"
 import { expectTypeOf, test } from "bun:test"
 import * as v from "valibot"
-import { useForm } from "vue-form-submit"
+import { useSubmit } from "vue-form-submit"
 import * as z from "zod"
 
 test("input with valibot schema", () => {
-  useForm({
+  useSubmit({
     input: { foo: "" as string | undefined },
     schema: v.object({
       foo: v.string(),
     }),
-    async submit(input) {
+    async onSubmit(input) {
       expectTypeOf(input).toEqualTypeOf<{ foo: string }>()
     },
   })
 })
 
 test("input with zod schema", () => {
-  useForm({
+  useSubmit({
     input: { email: "" as string | undefined },
     schema: z.object({
       email: z.email(),
     }),
-    async submit(input) {
+    async onSubmit(input) {
       expectTypeOf(input).toEqualTypeOf<{ email: string }>()
     },
   })
 })
 
 test("ref input with schema", () => {
-  useForm({
+  useSubmit({
     input: ref({ foo: "" as string | undefined }),
     schema: v.object({
       foo: v.string(),
     }),
-    async submit(input) {
+    async onSubmit(input) {
       expectTypeOf(input).toEqualTypeOf<{ foo: string }>()
     },
   })
 })
 
 test("ref input without schema", () => {
-  useForm({
+  useSubmit({
     input: ref({ foo: "" as string | undefined }),
-    async submit(input) {
+    async onSubmit(input) {
       expectTypeOf(input).toEqualTypeOf<{ foo: string | undefined }>()
     },
   })
 })
 
 test("input with undefined schema", () => {
-  useForm({
+  useSubmit({
     input: { foo: "" as string | undefined },
     schema: undefined,
-    async submit(input) {
+    async onSubmit(input) {
       expectTypeOf(input).toEqualTypeOf<{ foo: string | undefined }>()
     },
   })
 })
 
-test("no submit handler", () => {
-  useForm({
+test("no onSubmit handler", () => {
+  useSubmit({
     input: ref({ foo: "" as string | undefined }),
     schema: v.object({
       foo: v.string(),
@@ -69,7 +69,7 @@ test("no submit handler", () => {
 })
 
 test("schema accepting partial lax-typed input", () => {
-  useForm({
+  useSubmit({
     input: { foo: 0 as "" | number, bar: 0 as "" | number },
     schema: v.object({
       foo: v.number(),
@@ -78,21 +78,21 @@ test("schema accepting partial lax-typed input", () => {
 })
 
 test("dynamic schema", () => {
-  useForm({
+  useSubmit({
     schema: () =>
       v.object({
         foo: v.string(),
       }),
-    submit(input) {
+    onSubmit(input) {
       expectTypeOf(input).toEqualTypeOf<{ foo: string }>()
     },
   })
 })
 
 test("input without schema", () => {
-  const { submit } = useForm({
+  const { submit } = useSubmit({
     input: 123,
-    async submit(input, commit: boolean) {
+    async onSubmit(input, commit: boolean) {
       expectTypeOf(input).toEqualTypeOf<number>()
       return commit ? `${input}` : false
     },
@@ -101,8 +101,8 @@ test("input without schema", () => {
 })
 
 test("callback only", () => {
-  const { submit } = useForm({
-    async submit(input: number) {
+  const { submit } = useSubmit({
+    async onSubmit(input: number) {
       return `${input}`
     },
   })
@@ -110,19 +110,19 @@ test("callback only", () => {
 })
 
 test("callback shortcut", () => {
-  const { submit } = useForm(() => 123)
+  const { submit } = useSubmit(() => 123)
   expectTypeOf(submit).toEqualTypeOf<() => Promise<number | undefined>>()
 })
 
 test("separate submit, no input", () => {
-  const { submit } = useForm({}, async (input: number) => {
+  const { submit } = useSubmit({}, async (input: number) => {
     return `${input}`
   })
   expectTypeOf(submit).toEqualTypeOf<(input: number) => Promise<string | undefined>>()
 })
 
 test("separate submit, with schema", () => {
-  const { submit } = useForm(
+  const { submit } = useSubmit(
     {
       input: { foo: "" as string | undefined },
       schema: v.object({ foo: v.string() }),
@@ -135,7 +135,7 @@ test("separate submit, with schema", () => {
 })
 
 test("separate submit, input without schema", () => {
-  const { submit } = useForm(
+  const { submit } = useSubmit(
     { input: 123 },
     async (input, commit: boolean) => {
       expectTypeOf(input).toEqualTypeOf<number>()
