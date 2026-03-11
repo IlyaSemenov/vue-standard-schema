@@ -1,0 +1,8 @@
+glob_matcher: doublestar
+
+pre-commit:
+  commands:
+    eslint:
+      glob: "**/*.{js,ts,mjs,cjs}"
+      run: ./node_modules/.bin/eslint --fix {staged_files}
+      stage_fixed: true

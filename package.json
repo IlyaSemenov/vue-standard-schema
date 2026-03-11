@@ -27,7 +27,7 @@
   "scripts": {
     "build": "tsup",
     "lint": "eslint --fix .",
-    "prepare": "husky",
+    "prepare": "lefthook install",
     "prepublishOnly": "pnpm build",
     "test": "vitest run --typecheck"
   },
@@ -45,7 +45,6 @@
     "@vue/reactivity": "^3.4.29",
     "@vue/runtime-core": "^3.4.29",
     "eslint": "^9.35.0",
-    "husky": "^9.1.7",
     "tsconfig-vite-node": "^1.2.0",
     "tsup": "^8.5.0",
     "typescript": "^5.4.5",
